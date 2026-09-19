@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Outfit", system-ui, sans-serif;
+
+  --color-lila-50: #faf7ff;
+  --color-lila-100: #f1eaff;
+  --color-lila-200: #ddd0f7;
+  --color-lila-500: #8b76c9;
+  --color-lila-700: #5f4b9e;
+  --color-lila-900: #3d3463;
+  --color-rosa-100: #fde7f1;
+  --color-rosa-200: #f9d0e3;
+  --color-rosa-300: #f4b3d2;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #fffdfd;
+  color: #4a4458;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif-display {
+  font-family: var(--font-serif);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.hero-gradient-text {
+  color: #6d5ba8;
+}
+
+.card-shadow {
+  box-shadow: 0 20px 45px -20px rgba(109, 91, 168, 0.25);
+}
+
+.pink-lavender-bg {
+  background: linear-gradient(135deg, #fbddec 0%, #f3e2f0 35%, #ddd0f7 100%);
+}
+
+.doodle {
+  color: #cfc3e8;
+  opacity: 0.7;
+}
