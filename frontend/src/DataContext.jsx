@@ -13,6 +13,8 @@ export function DataProvider({ children }) {
     datosContacto: null,
     horarios: null,
     turnos: {},
+    config: null,
+    anuncios: [],
   });
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +22,7 @@ export function DataProvider({ children }) {
   const cargarTodo = useCallback(async () => {
     try {
       setCargando(true);
-      const [hero, sobreMi, servicios, articulos, faqs, datosContacto, horarios, turnos] = await Promise.all([
+      const [hero, sobreMi, servicios, articulos, faqs, datosContacto, horarios, turnos, config, anuncios] = await Promise.all([
         api.getHero().catch(() => null),
         api.getSobreMi().catch(() => null),
         api.getServicios().catch(() => []),
@@ -29,8 +31,10 @@ export function DataProvider({ children }) {
         api.getDatos().catch(() => null),
         api.getHorarios().catch(() => null),
         api.getTurnos().catch(() => ({})),
+        api.getConfig().catch(() => null),
+        api.getAnuncios().catch(() => []),
       ]);
-      setDatos({ hero, sobreMi, servicios, articulos, faqs, datosContacto, horarios, turnos });
+      setDatos({ hero, sobreMi, servicios, articulos, faqs, datosContacto, horarios, turnos, config, anuncios });
       setError(null);
     } catch (e) {
       setError(e.message);
@@ -53,6 +57,8 @@ export function DataProvider({ children }) {
       datosContacto: api.getDatos,
       horarios: api.getHorarios,
       turnos: api.getTurnos,
+      config: api.getConfig,
+      anuncios: api.getAnuncios,
     };
     if (metodos[seccion]) {
       metodos[seccion]().then(data => setDatos(d => ({ ...d, [seccion]: data })));

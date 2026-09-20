@@ -9,6 +9,7 @@ const certificadoSchema = new mongoose.Schema({
 
 const itemSchema = new mongoose.Schema({
   texto: { type: String, required: true },
+  link: { type: String, default: "" },
   orden: { type: Number, default: 0 },
 });
 
@@ -19,6 +20,7 @@ const sobreMiSchema = new mongoose.Schema(
     imagen: { type: String }, // URL Cloudinary
     items: [itemSchema],
     certificados: [certificadoSchema],
+    mostrarLibro: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

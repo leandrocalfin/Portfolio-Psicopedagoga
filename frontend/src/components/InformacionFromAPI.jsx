@@ -33,10 +33,9 @@ export function InformacionFromAPI() {
             <article key={a._id || inicio + i} onClick={() => setSel(inicio + i)} className="bg-white rounded-2xl overflow-hidden card-shadow hover:-translate-y-1 transition flex flex-col cursor-pointer">
               {a.imagen && <img src={a.imagen} alt={a.titulo} className="w-full h-40 object-contain bg-lila-50/60" />}
               <div className="p-4 flex flex-col flex-1">
-                <span className="self-start text-[10px] font-semibold bg-rosa-100 text-lila-900 px-2.5 py-0.5 rounded-full">{a.tag || "General"}</span>
-                <h3 className="font-serif-display text-lg leading-snug text-lila-900 mt-2 line-clamp-2">{a.titulo}</h3>
+                <h3 className="font-serif-display text-lg leading-snug text-lila-900 mt-1 line-clamp-2">{a.titulo}</h3>
                 <p className="text-[13px] text-stone-600 mt-1.5 leading-relaxed flex-1 line-clamp-2">{a.descripcion}</p>
-                <span className="mt-3 self-start text-[13px] font-semibold text-lila-700 underline underline-offset-4">Leer más</span>
+                <span className="mt-3 self-center text-[13px] font-semibold text-lila-700 underline underline-offset-4">Leer más</span>
               </div>
             </article>
           ))}
@@ -58,11 +57,8 @@ export function InformacionFromAPI() {
                 {ordenados[sel].imagen && <img src={ordenados[sel].imagen} alt={ordenados[sel].titulo} className="w-full max-h-[70vh] object-contain" />}
               </div>
               <div className="p-7 md:p-9 md:max-h-[80vh] md:overflow-y-auto">
-                <span className="text-[11px] font-semibold bg-rosa-100 text-lila-900 px-3 py-1 rounded-full">{ordenados[sel].tag}</span>
-                <h3 className="font-serif-display text-2xl md:text-3xl text-lila-900 mt-3">{ordenados[sel].titulo}</h3>
-                <div className="mt-4 space-y-4 text-[15px] text-stone-600 leading-relaxed">
-                  {(ordenados[sel].cuerpo || []).map((p, j) => <p key={j}>{p}</p>)}
-                </div>
+                <h3 className="font-serif-display text-2xl md:text-3xl text-lila-900 mt-1">{ordenados[sel].titulo}</h3>
+                <p className="mt-4 text-[15px] text-stone-600 leading-relaxed whitespace-pre-line">{ordenados[sel].descripcion}</p>
               </div>
             </div>
           </div>

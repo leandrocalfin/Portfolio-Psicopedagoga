@@ -1,15 +1,33 @@
 const API_BASE = '/api';
 
+// Auth por cookie httpOnly: el navegador envía la cookie solo.
+// El 2do parámetro (_token) se mantiene por compatibilidad con llamadas
+// existentes pero se ignora: nunca más se usa ni se guarda ningún token en JS.
 async function request(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   const config = {
+    credentials: 'include',
     headers: { 'Content-Type': 'application/json', ...options.headers },
     ...options,
   };
-  if (config.body && typeof config.body === 'object') {
+  config.credentials = 'include';
+  if (config.body && typeof config.body === 'object' && !(config.body instanceof FormData)) {
     config.body = JSON.stringify(config.body);
   }
   const res = await fetch(url, config);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.mensaje || `Error ${res.status}`);
+  }
+  return data;
+}
+
+async function uploadFetch(endpoint, formData) {
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.mensaje || `Error ${res.status}`);
@@ -22,83 +40,89 @@ export const api = {
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
   register: (nombre, email, password) => request('/auth/register', { method: 'POST', body: { nombre, email, password } }),
   me: () => request('/auth/me'),
+  logout: () => request('/auth/logout', { method: 'POST' }),
+  updatePerfil: (data) => request('/auth/perfil', { method: 'PUT', body: data }),
+  updatePassword: (data) => request('/auth/password', { method: 'PUT', body: data }),
 
   // Hero
   getHero: () => request('/hero'),
-  updateHero: (data, token) => request('/hero', { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
+  updateHero: (data) => request('/hero', { method: 'PUT', body: data }),
 
   // Sobre Mí
   getSobreMi: () => request('/sobre-mi'),
-  updateSobreMi: (data, token) => request('/sobre-mi', { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
+  updateSobreMi: (data) => request('/sobre-mi', { method: 'PUT', body: data }),
 
   // Servicios
   getServicios: () => request('/servicios'),
-  createServicio: (data, token) => request('/servicios', { method: 'POST', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  updateServicio: (id, data, token) => request(`/servicios/${id}`, { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  deleteServicio: (id, token) => request(`/servicios/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  createServicio: (data) => request('/servicios', { method: 'POST', body: data }),
+  updateServicio: (id, data) => request(`/servicios/${id}`, { method: 'PUT', body: data }),
+  deleteServicio: (id) => request(`/servicios/${id}`, { method: 'DELETE' }),
 
   // Información / Artículos
   getArticulos: () => request('/informacion'),
-  createArticulo: (data, token) => request('/informacion', { method: 'POST', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  updateArticulo: (id, data, token) => request(`/informacion/${id}`, { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  deleteArticulo: (id, token) => request(`/informacion/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  createArticulo: (data) => request('/informacion', { method: 'POST', body: data }),
+  updateArticulo: (id, data) => request(`/informacion/${id}`, { method: 'PUT', body: data }),
+  deleteArticulo: (id) => request(`/informacion/${id}`, { method: 'DELETE' }),
 
   // FAQs
   getFAQs: () => request('/faqs'),
-  createFAQ: (data, token) => request('/faqs', { method: 'POST', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  updateFAQ: (id, data, token) => request(`/faqs/${id}`, { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  deleteFAQ: (id, token) => request(`/faqs/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  createFAQ: (data) => request('/faqs', { method: 'POST', body: data }),
+  updateFAQ: (id, data) => request(`/faqs/${id}`, { method: 'PUT', body: data }),
+  deleteFAQ: (id) => request(`/faqs/${id}`, { method: 'DELETE' }),
 
   // Datos de contacto
   getDatos: () => request('/datos'),
-  updateDatos: (data, token) => request('/datos', { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
+  updateDatos: (data) => request('/datos', { method: 'PUT', body: data }),
 
   // Horarios
   getHorarios: () => request('/horarios'),
-  updateHorarios: (data, token) => request('/horarios', { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
+  updateHorarios: (data) => request('/horarios', { method: 'PUT', body: data }),
+
+  // Config del sitio
+  getConfig: () => request('/config'),
+  updateConfig: (data) => request('/config', { method: 'PUT', body: data }),
+
+  // Anuncios / carteles flotantes
+  getAnuncios: () => request('/anuncios'),
+  createAnuncio: (data) => request('/anuncios', { method: 'POST', body: data }),
+  updateAnuncio: (id, data) => request(`/anuncios/${id}`, { method: 'PUT', body: data }),
+  deleteAnuncio: (id) => request(`/anuncios/${id}`, { method: 'DELETE' }),
 
   // Agenda / Turnos
   getTurnos: () => request('/agenda'),
-  createTurno: (data, token) => request('/agenda', { method: 'POST', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  updateTurno: (id, data, token) => request(`/agenda/${id}`, { method: 'PUT', body: data, headers: { Authorization: `Bearer ${token}` } }),
-  deleteTurno: (id, token) => request(`/agenda/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }),
+  reservarTurno: (data) => request('/agenda/reservar', { method: 'POST', body: data }),
+  createTurno: (data) => request('/agenda', { method: 'POST', body: data }),
+  updateTurno: (id, data) => request(`/agenda/${id}`, { method: 'PUT', body: data }),
+  deleteTurno: (id) => request(`/agenda/${id}`, { method: 'DELETE' }),
 
   // Upload
-  uploadImagen: (file, token, folder = 'psicopedagoga') => {
+  uploadImagen: (file, folder = 'psicopedagoga') => {
     const formData = new FormData();
     formData.append('imagen', file);
     formData.append('folder', folder);
-    return fetch(`${API_BASE}/upload`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    }).then(r => r.json());
+    return uploadFetch('/upload', formData);
   },
-  uploadMultiple: (files, token, folder = 'psicopedagoga') => {
+  uploadMultiple: (files, folder = 'psicopedagoga') => {
     const formData = new FormData();
     files.forEach(f => formData.append('imagenes', f));
     formData.append('folder', folder);
-    return fetch(`${API_BASE}/upload/multiple`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: formData,
-    }).then(r => r.json());
+    return uploadFetch('/upload/multiple', formData);
   },
-  deleteImagen: (publicId, token) => request('/upload', { method: 'DELETE', body: { publicId }, headers: { Authorization: `Bearer ${token}` } }),
+  deleteImagen: (publicId) => request('/upload', { method: 'DELETE', body: { publicId } }),
 };
 
+// Compatibilidad: existen para no romper imports, pero ya no guardan nada.
+// Se dejan como no-op y se limpia cualquier token legacy que haya quedado.
 export function getAuthToken() {
-  return localStorage.getItem('token');
+  return null;
 }
 
-export function setAuthToken(token) {
-  localStorage.setItem('token', token);
-}
+export function setAuthToken() {}
 
 export function clearAuthToken() {
-  localStorage.removeItem('token');
+  try { localStorage.removeItem('token'); } catch {}
 }
 
 export function isAuthenticated() {
-  return !!getAuthToken();
+  return false;
 }

@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
 import routes from "./routes/index.js";
 
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Rutas
 app.use("/api", routes);
@@ -38,18 +40,14 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ mensaje: "Error interno del servidor" });
 });
 
-// Iniciar servidor
+// Iniciar servidor (aunque falle Mongo, para no romper el proxy de Vite)
 const start = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Servidor corriendo en puerto ${PORT}`);
-      console.log(`Entorno: ${process.env.NODE_ENV}`);
-    });
-  } catch (error) {
-    console.error("Error al iniciar:", error);
-    process.exit(1);
-  }
+  const dbOk = await connectDB();
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en puerto ${PORT}`);
+    console.log(`Entorno: ${process.env.NODE_ENV}`);
+    console.log(`MongoDB: ${dbOk ? "conectado" : "NO conectado (modo degradado)"}`);
+  });
 };
 
 start();

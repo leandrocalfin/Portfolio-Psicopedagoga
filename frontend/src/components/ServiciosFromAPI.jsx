@@ -12,7 +12,8 @@ export function ServiciosFromAPI() {
   return (
     <section id="servicios" className="pink-lavender-bg py-16 md:py-20 scroll-mt-20">
       <div className="max-w-6xl mx-auto px-5">
-        <h2 className="font-serif-display text-center text-2xl md:text-4xl text-lila-900">¿Cómo puedo ayudarte?</h2>
+        <p className="text-xs tracking-[0.2em] uppercase text-lila-500 font-semibold text-center">Servicios</p>
+        <h2 className="font-serif-display text-center text-2xl md:text-3xl text-lila-900 mt-2">¿Cómo puedo ayudarte?</h2>
         <div className="mt-8 md:mt-10 grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5 justify-center">
           {servicios.map((s) => (
             <div key={s._id || s.titulo} className="bg-white rounded-2xl p-4 md:p-7 text-center card-shadow hover:-translate-y-1 transition">
@@ -24,7 +25,7 @@ export function ServiciosFromAPI() {
           <div className="bg-lila-900 text-white rounded-2xl p-4 md:p-7 text-center card-shadow flex flex-col justify-center">
             <p className="font-serif-display text-lg md:text-2xl">Consultas y Orientación</p>
             <p className="text-xs md:text-sm text-white/80 mt-2">Contanos tu caso y busquemos juntos el mejor camino a seguir.</p>
-            <a href="#contacto" className="mt-3 md:mt-4 inline-flex justify-center items-center gap-2 bg-white text-lila-900 text-xs md:text-sm font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full">Consultar</a>
+            <button onClick={() => document.querySelector("#contacto")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="mt-3 md:mt-4 inline-flex justify-center items-center gap-2 bg-white text-lila-900 text-xs md:text-sm font-semibold px-4 md:px-5 py-2 md:py-2.5 rounded-full">Consultar</button>
           </div>
         </div>
       </div>

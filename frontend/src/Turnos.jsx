@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { ArrowLeft, Building2, Video, Check } from "lucide-react";
-
-const WHATSAPP = "https://wa.me/5491100000000";
+import { useDatos } from "./DataContext.jsx";
+import { api } from "./api.js";
 
 const MODALIDADES = [
   { id: "presencial", label: "Presencial", icon: Building2 },
@@ -17,7 +17,8 @@ const SERVICIOS_TURNO = [
   "Otro",
 ];
 
-const HORAS = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
+const HORAS_FALLBACK = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
+const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 function proximasFechas(n = 10) {
   const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
@@ -39,6 +40,7 @@ function proximasFechas(n = 10) {
 
 export default function Turnos() {
   const fechas = useMemo(() => proximasFechas(10), []);
+  const { datos } = useDatos();
   const [modalidad, setModalidad] = useState("");
   const [servicio, setServicio] = useState("");
   const [fecha, setFecha] = useState("");
@@ -46,13 +48,47 @@ export default function Turnos() {
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
   const [confirmado, setConfirmado] = useState(false);
+  const [reservando, setReservando] = useState(false);
+  const [errorReserva, setErrorReserva] = useState("");
+
+  const numeroAdmin = datos.datosContacto?.whatsapp || "5491100000000";
+
+  const reservar = async () => {
+    setReservando(true);
+    setErrorReserva("");
+    try {
+      await api.reservarTurno({ dia: diaDeFecha, hora, nombre: nombre.trim(), telefono: telefono.trim(), servicio, modalidad, fecha });
+      setConfirmado(true);
+    } catch (e) {
+      setErrorReserva(e.message);
+    } finally {
+      setReservando(false);
+    }
+  };
+
+  // Horas habilitadas por la admin para el día de la fecha elegida.
+  // Si aún no cargó la config, se usa el fallback.
+  const diaDeFecha = fecha ? DIAS_SEMANA[new Date(fecha + "T12:00:00").getDay()] : null;
+  const horasHabilitadas = diaDeFecha
+    ? (datos.horarios?.dias?.find((d) => d.dia === diaDeFecha)?.horas ?? HORAS_FALLBACK)
+    : HORAS_FALLBACK;
+  // Horas ocupadas (pendiente/confirmado) para ese día.
+  const ocupadas = diaDeFecha
+    ? new Set(
+        Object.entries(datos.turnos || {})
+          .flatMap(([, arr]) => arr || [])
+          .filter((t) => (t.dia === diaDeFecha || (t.fecha && String(t.fecha).slice(0, 10) === fecha)) && ["pendiente", "confirmado"].includes(t.estado))
+          .map((t) => t.hora)
+      )
+    : new Set();
 
   const paso = !modalidad ? 1 : !servicio ? 2 : !fecha || !hora ? 3 : 4;
   const completo = modalidad && servicio && fecha && hora && nombre.trim() && telefono.trim();
 
   const fechaLabel = fechas.find((f) => f.id === fecha)?.etiqueta ?? fecha;
 
-  const mensaje = `Hola! Quiero reservar un turno.%0A- Modalidad: ${modalidad}%0A- Servicio: ${encodeURIComponent(servicio)}%0A- Fecha: ${encodeURIComponent(fechaLabel)}%0A- Hora: ${hora}%0A- Nombre: ${encodeURIComponent(nombre)}%0A- Tel: ${encodeURIComponent(telefono)}`;
+  const textoPlano = `Hola! Reservé un turno por la web y quedó en estado PENDIENTE.\n- Modalidad: ${modalidad}\n- Servicio: ${servicio}\n- Fecha: ${fechaLabel} (${diaDeFecha})\n- Hora: ${hora}\n- Nombre: ${nombre}\n- Tel: ${telefono}`;
+  const mensaje = encodeURIComponent(textoPlano);
 
   const pill = (active) =>
     `px-4 py-2.5 rounded-xl border text-[11px] font-semibold tracking-wide transition ${
@@ -68,9 +104,9 @@ export default function Turnos() {
           <span className="w-14 h-14 rounded-full bg-emerald-100 grid place-items-center mx-auto">
             <Check size={26} className="text-emerald-700" />
           </span>
-          <h2 className="font-serif-display text-3xl text-lila-900 mt-4">¡Reserva registrada!</h2>
+          <h2 className="font-serif-display text-3xl text-lila-900 mt-4">¡Turno en estado pendiente!</h2>
           <p className="text-sm text-stone-600 mt-2">
-            {nombre}, tu solicitud quedó anotada (demo). Te contactaremos al {telefono}.
+            {nombre}, tu solicitud ya quedó registrada. En breve se comunicarán con vos por WhatsApp al {telefono} para pedirte datos y documentación y terminar de confirmar el turno.
           </p>
           <div className="mt-4 text-sm text-stone-700 bg-lila-50 rounded-2xl p-4 text-left space-y-1">
             <p><strong>Modalidad:</strong> {modalidad}</p>
@@ -78,21 +114,16 @@ export default function Turnos() {
             <p><strong>Fecha:</strong> {fechaLabel}</p>
             <p><strong>Hora:</strong> {hora}</p>
           </div>
-          <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href={`${WHATSAPP}?text=${mensaje}`}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex justify-center items-center gap-2 bg-lila-900 text-white text-sm font-medium px-6 py-3 rounded-full hover:bg-lila-700 transition"
-            >
-              Confirmar por WhatsApp
-            </a>
+          <div className="mt-6 flex flex-col gap-3 justify-center">
             <a
               href="#/"
-              className="inline-flex justify-center items-center gap-2 border-2 border-lila-200 text-lila-900 text-sm font-semibold px-6 py-3 rounded-full hover:bg-lila-50 transition"
+              className="inline-flex justify-center items-center gap-2 pink-lavender-bg text-lila-900 font-semibold px-6 py-3 rounded-full text-sm hover:brightness-95 transition"
             >
               Volver al inicio
             </a>
+            <p className="text-[11px] text-stone-400 text-center">
+              ¿Preferís adelantar? <a href={`https://wa.me/${numeroAdmin}?text=${mensaje}`} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:text-lila-700">Escribinos por WhatsApp</a>
+            </p>
           </div>
         </div>
       </div>
@@ -158,11 +189,16 @@ export default function Turnos() {
             ))}
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
-            {HORAS.map((h) => (
-              <button key={h} onClick={() => setHora(h)} className={pill(hora === h)}>
-                {h}
-              </button>
-            ))}
+            {!fecha && <p className="text-xs text-stone-400">Elegí primero una fecha para ver los horarios disponibles.</p>}
+            {fecha && !horasHabilitadas.length && <p className="text-xs text-stone-400">Ese día no hay horarios habilitados. Probá con otra fecha.</p>}
+            {fecha && horasHabilitadas.map((h) => {
+              const llena = ocupadas.has(h);
+              return (
+                <button key={h} disabled={llena} onClick={() => setHora(h)} title={llena ? "Horario ocupado" : ""} className={`${pill(hora === h)} ${llena ? "opacity-40 line-through cursor-not-allowed" : ""}`}>
+                  {h}{llena ? " · ocupado" : ""}
+                </button>
+              );
+            })}
           </div>
 
           <p className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold mt-6">4 · Tus datos</p>
@@ -182,12 +218,13 @@ export default function Turnos() {
           </div>
 
           <button
-            disabled={!completo}
-            onClick={() => setConfirmado(true)}
+            disabled={!completo || reservando}
+            onClick={reservar}
             className="mt-6 w-full inline-flex justify-center items-center gap-2 pink-lavender-bg hover:brightness-95 transition text-lila-900 font-semibold px-6 py-3.5 rounded-full text-sm disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Confirmar reserva →
+            {reservando ? "Registrando..." : "Confirmar reserva →"}
           </button>
+          {errorReserva && <p className="text-xs font-semibold text-red-600 text-center mt-3">{errorReserva}</p>}
           <p className="text-[11px] text-stone-400 text-center mt-3">
             Completá modalidad, servicio, fecha, horario y tus datos para confirmar.
           </p>

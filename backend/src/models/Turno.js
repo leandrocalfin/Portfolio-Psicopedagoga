@@ -17,6 +17,10 @@ const turnoSchema = new mongoose.Schema(
     },
     fecha: { type: Date }, // fecha específica del turno (opcional)
     notas: { type: String }, // notas privadas del admin
+    telefono: { type: String, default: "" },
+    servicio: { type: String, default: "" },
+    modalidad: { type: String, default: "" },
+    origen: { type: String, enum: ["web", "admin"], default: "admin" },
   },
   { timestamps: true }
 );

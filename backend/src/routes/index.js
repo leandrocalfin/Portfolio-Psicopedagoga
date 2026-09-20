@@ -4,6 +4,10 @@ import {
   login,
   register,
   me,
+  logout,
+  updatePerfil,
+  cambiarPassword,
+  getCaptcha,
 } from "../controllers/authController.js";
 import {
   getHero,
@@ -40,10 +44,21 @@ import {
   updateHorarios,
 } from "../controllers/horariosController.js";
 import {
+  getConfig,
+  updateConfig,
+} from "../controllers/configController.js";
+import {
+  getAnuncios,
+  createAnuncio,
+  updateAnuncio,
+  deleteAnuncio,
+} from "../controllers/anuncioController.js";
+import {
   getTurnos,
   createTurno,
   updateTurno,
   deleteTurno,
+  reservarTurno,
 } from "../controllers/turnoController.js";
 import {
   uploadImagen,
@@ -60,6 +75,13 @@ router.post("/auth/register", register);
 
 // Auth (protegidas)
 router.get("/auth/me", proteger, me);
+router.put("/auth/perfil", proteger, updatePerfil);
+router.put("/auth/password", proteger, cambiarPassword);
+router.post("/auth/logout", logout);
+
+// Captcha (público)
+router.get("/captcha", getCaptcha);
+router.get("/auth/captcha", getCaptcha);
 
 // Hero
 router.get("/hero", getHero);
@@ -95,8 +117,19 @@ router.put("/datos", proteger, updateDatosContacto);
 router.get("/horarios", getHorarios);
 router.put("/horarios", proteger, updateHorarios);
 
+// Config del sitio (pública lectura, solo admin escribe)
+router.get("/config", getConfig);
+router.put("/config", proteger, updateConfig);
+
+// Anuncios / carteles flotantes (público leer, solo admin escribir)
+router.get("/anuncios", getAnuncios);
+router.post("/anuncios", proteger, createAnuncio);
+router.put("/anuncios/:id", proteger, updateAnuncio);
+router.delete("/anuncios/:id", proteger, deleteAnuncio);
+
 // Agenda / Turnos
 router.get("/agenda", getTurnos);
+router.post("/agenda/reservar", reservarTurno);
 router.post("/agenda", proteger, createTurno);
 router.put("/agenda/:id", proteger, updateTurno);
 router.delete("/agenda/:id", proteger, deleteTurno);

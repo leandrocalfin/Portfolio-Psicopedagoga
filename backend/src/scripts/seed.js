@@ -10,6 +10,8 @@ import FAQ from "../models/FAQ.js";
 import DatosContacto from "../models/DatosContacto.js";
 import HorariosAtencion from "../models/HorariosAtencion.js";
 import Turno from "../models/Turno.js";
+import Anuncio from "../models/Anuncio.js";
+import Config from "../models/Config.js";
 import Usuario from "../models/Usuario.js";
 import { connectDB } from "../config/db.js";
 
@@ -26,6 +28,8 @@ const seedData = async () => {
       DatosContacto.deleteMany({}),
       HorariosAtencion.deleteMany({}),
       Turno.deleteMany({}),
+      Anuncio.deleteMany({}),
+      Config.deleteMany({}),
       Usuario.deleteMany({}),
     ]);
     console.log("Colecciones limpiadas");
@@ -50,6 +54,7 @@ const seedData = async () => {
         { texto: "Especialización en Terapia Cognitivo Conductual Nivel I (ARITA)", orden: 4 },
         { texto: "Método TEACCH (2022) · Diplomada en prácticas inclusivas en CEA (FACSO)", orden: 5 },
         { texto: "II° Congreso Internacional Autismo Santa Cruz (2023)", orden: 6 },
+        { texto: "Autora del libro «¿Y por qué no a mí?»", orden: 7 },
       ],
       certificados: [
         { titulo: "Certificado Profesional Profectum Nivel 1", organizacion: "Profectum Foundation · 2024", imagen: "", año: 2024 },
@@ -131,6 +136,20 @@ const seedData = async () => {
     ];
     await Turno.insertMany(turnos);
     console.log("✓ Turnos creados");
+
+    // Config del sitio
+    await Config.create({});
+    console.log("✓ Config creada");
+
+    // Anuncio de ejemplo (pausado para no molestar hasta que lo activen)
+    await Anuncio.create({
+      titulo: "17 de septiembre · Día de la Psicopedagogía",
+      mensaje: "¡Feliz día a todos los profesionales!",
+      imagen: "",
+      activo: false,
+      orden: 1,
+    });
+    console.log("✓ Anuncio de ejemplo creado");
 
     // Usuario admin
     await Usuario.create({
