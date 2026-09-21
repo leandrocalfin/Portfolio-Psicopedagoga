@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 // Auth por cookie httpOnly: el navegador envía la cookie solo.
 // El 2do parámetro (_token) se mantiene por compatibilidad con llamadas
