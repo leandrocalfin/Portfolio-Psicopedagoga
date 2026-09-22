@@ -34,14 +34,8 @@ const globalLimiter = rateLimit({
 });
 app.use(globalLimiter);
 
-// Rate limiting estricto para auth (5 req/15min por IP)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 5,
-  message: { mensaje: "Demasiados intentos de autenticación, intente en 15 minutos" },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
+// Rate limiting (el límite de login vive en routes/index.js,
+// aplicado solo a POST /api/auth/login para no contar GET /me ni logout)
 
 // Middlewares
 app.use(cors({
@@ -53,7 +47,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Rutas API
-app.use("/api/auth", authLimiter); // rate limit estricto en auth
 app.use("/api", routes);
 
 // Health check

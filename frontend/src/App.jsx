@@ -22,6 +22,7 @@ import {
   X,
   LogOut,
   Mail,
+  Lock,
 } from "lucide-react";
 
 function InstagramIcon({ size = 16 }) {
@@ -239,15 +240,14 @@ function Footer() {
         </div>
         <div className="flex flex-col items-center gap-1">
           <img src="/logo.png" alt="Logo Estefani Salaya" className="h-14 w-14 object-contain drop-shadow-[0_2px_10px_rgba(255,255,255,0.25)]" />
-          <div className="flex items-center justify-center gap-1.5 whitespace-nowrap">
-            <p className="font-serif-display text-base text-white">Lic. Salaya Estefani</p>
-            <span aria-hidden className="font-serif-display text-base text-rosa-200">·</span>
-            <p className="font-serif-display text-base text-white">MPRN 886</p>
+          <div className="flex flex-col items-center gap-0.5 text-center">
+            <p className="font-script text-2xl leading-none text-white pt-1 whitespace-nowrap">Lic. Salaya Estefani</p>
+            <p className="font-sans font-light text-[11px] tracking-[0.22em] uppercase text-white/70">MPRN 886</p>
           </div>
         </div>
-        <div className="flex flex-col gap-0.5 items-center md:items-end text-center md:text-right md:justify-self-end">
-          <p className="text-xs text-white/70">© {new Date().getFullYear()} - Todos los derechos reservados</p>
-          <p className="text-[11px] text-white/50">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="underline underline-offset-2 decoration-white/30 hover:text-white transition">Leandro Calfin</a></p>
+        <div className="flex flex-col gap-1 items-center md:items-end text-center md:text-right md:justify-self-end font-sans font-light tracking-[0.14em] uppercase">
+          <p className="text-[10px] md:text-[11px] text-white/60 flex items-center gap-1.5 justify-center md:justify-end">© {new Date().getFullYear()} — Todos los derechos reservados <a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition ml-1"><Lock size={11} /></a></p>
+          <p className="text-[10px] md:text-[11px] text-white/40">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="text-white/60 underline underline-offset-4 decoration-white/20 hover:text-white transition">Leandro Calfin</a></p>
         </div>
       </div>
     </footer>

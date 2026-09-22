@@ -3,6 +3,7 @@
 @theme {
   --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   --font-sans: "Outfit", system-ui, sans-serif;
+  --font-script: "Parisienne", cursive;
 
   --color-lila-50: #faf7ff;
   --color-lila-100: #f1eaff;
@@ -45,6 +46,11 @@ button:disabled,
   font-family: var(--font-serif);
   font-weight: 500;
   letter-spacing: -0.01em;
+}
+
+.font-script {
+  font-family: var(--font-script);
+  font-weight: 400;
 }
 
 .hero-gradient-text {

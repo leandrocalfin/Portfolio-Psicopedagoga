@@ -10,10 +10,11 @@ export function FAQFromAPI() {
 
   const [setRef, visibleIndices] = useStaggeredReveal(faqs.length, { threshold: 0.08, rootMargin: "0px 0px -30px 0px" });
 
-  if (!faqs.length) return <section id="faq" className="max-w-3xl mx-auto px-5 py-16 scroll-mt-20"><div className="text-center text-stone-500">Cargando preguntas...</div></section>;
+  if (!faqs.length) return <section id="faq" className="pink-lavender-bg scroll-mt-20"><div className="max-w-3xl mx-auto px-5 py-16 text-center text-stone-500">Cargando preguntas...</div></section>;
 
   return (
-    <section id="faq" className="max-w-3xl mx-auto px-5 py-16 scroll-mt-20">
+    <section id="faq" className="pink-lavender-bg scroll-mt-20">
+      <div className="max-w-3xl mx-auto px-5 py-16">
       <p className="text-xs tracking-[0.2em] uppercase text-lila-500 font-semibold text-center">Preguntas</p>
       <h2 className="font-serif-display text-3xl md:text-4xl text-lila-900 text-center mt-2">Preguntas frecuentes</h2>
       <div className="mt-8 space-y-3">
@@ -33,6 +34,7 @@ export function FAQFromAPI() {
             </div>
           );
         })}
+      </div>
       </div>
     </section>
   );

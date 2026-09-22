@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { proteger } from "../middleware/auth.js";
 import { logAdminActionMiddleware } from "../middleware/adminLogger.js";
 import {
@@ -97,8 +98,18 @@ import { uploadSingle, uploadMultiple as uploadMultipleMiddleware } from "../mid
 const router = Router();
 const adminLog = logAdminActionMiddleware;
 
+// Solo el login lleva rate limit estricto (20 intentos / 15 min por IP).
+// GET /me, logout, etc. no cuentan, para no bloquear falsamente.
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { mensaje: "Demasiados intentos de autenticación, intente en 15 minutos" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // Auth (públicas)
-router.post("/auth/login", validateLogin, login);
+router.post("/auth/login", loginLimiter, validateLogin, login);
 router.post("/auth/register", validateRegister, register);
 
 // Auth (protegidas)

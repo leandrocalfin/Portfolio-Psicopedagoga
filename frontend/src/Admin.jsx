@@ -1502,10 +1502,6 @@ function SeccionDatos() {
   const [guardando, setGuardando] = useState(false);
   const [guardandoPerfil, setGuardandoPerfil] = useState(false);
   const [guardandoPass, setGuardandoPass] = useState(false);
-  const [captchaId, setCaptchaId] = useState("");
-  const [captchaInput, setCaptchaInput] = useState("");
-  const [showCaptcha, setShowCaptcha] = useState(false);
-  const captchaOk = captchaInput.trim().length > 0;
 
   useEffect(() => {
     if (datos.datosContacto) setForm({
@@ -1555,29 +1551,16 @@ function SeccionDatos() {
     }
   };
 
-  const solicitarCambio = () => {
-    setMsgPass("");
-    if (!pass.actual || !pass.nueva || !pass.confirmar) { setMsgPass("Completá todos los campos"); setOkPass(false); return; }
-    if (pass.nueva !== pass.confirmar) { setMsgPass("La confirmación no coincide"); setOkPass(false); return; }
-    setShowCaptcha(true);
-    setCaptchaId("");
-    setCaptchaInput("");
-  };
-
   const cambiarPass = async () => {
     setGuardandoPass(true);
     setMsgPass("");
     try {
-      if (!captchaOk) throw new Error("Completá el captcha para habilitar el cambio");
       if (!pass.actual || !pass.nueva || !pass.confirmar) throw new Error("Completá todos los campos");
       if (pass.nueva !== pass.confirmar) throw new Error("La confirmación no coincide");
-      await api.updatePassword({ actual: pass.actual, nueva: pass.nueva, confirmar: pass.confirmar, captchaId, captcha: captchaInput });
+      await api.updatePassword({ actual: pass.actual, nueva: pass.nueva, confirmar: pass.confirmar });
       setMsgPass("Contraseña cambiada ✓");
       setOkPass(true);
       setPass({ actual: "", nueva: "", confirmar: "" });
-      setCaptchaId("");
-      setCaptchaInput("");
-      setShowCaptcha(false);
     } catch (e) {
       setMsgPass(e.message);
       setOkPass(false);
@@ -1598,9 +1581,6 @@ function SeccionDatos() {
   const cancelarPass = () => {
     setPass({ actual: "", nueva: "", confirmar: "" });
     setMsgPass("");
-    setCaptchaId("");
-    setCaptchaInput("");
-    setShowCaptcha(false);
   };
 
   return (
@@ -1652,20 +1632,9 @@ function SeccionDatos() {
         </div>
         <div><p className={labelCls}>Confirmar nueva</p><input type="password" value={pass.confirmar} onChange={(e)=> setPass({...pass, confirmar: e.target.value})} className={`${inputCls} mt-1.5`} /></div>
         <div className="flex gap-2 flex-wrap justify-center">
-          <button onClick={solicitarCambio} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition"><Save size={15} /> Actualizar contraseña</button>
+          <button onClick={cambiarPass} disabled={guardandoPass} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition disabled:opacity-50"><Save size={15} /> {guardandoPass ? "Guardando..." : "Actualizar contraseña"}</button>
           <button onClick={cancelarPass} className="inline-flex items-center gap-2 border border-stone-200 text-stone-600 text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-red-50 hover:text-red-700 hover:border-red-200 transition bg-white">Cancelar</button>
         </div>
-        {showCaptcha && (
-          <div className="pt-2 space-y-3 border-t border-stone-100">
-            <SimpleCaptcha onChange={(id, input) => { setCaptchaId(id); setCaptchaInput(input); }} />
-            {!captchaOk && <p className="text-xs text-amber-700 text-center">Completá el captcha para desbloquear el cambio.</p>}
-            {captchaOk && <p className="text-xs font-semibold text-emerald-600 text-center">✓ Captcha ingresado</p>}
-            <div className="flex gap-2 justify-center">
-              <button onClick={cambiarPass} disabled={guardandoPass || !captchaOk} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition disabled:opacity-50"><Save size={15} /> {guardandoPass ? "Guardando..." : "Confirmar cambio"}</button>
-              <button onClick={() => { setShowCaptcha(false); setCaptchaId(""); setCaptchaInput(""); }} className="inline-flex items-center gap-2 border border-stone-200 text-stone-600 text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-stone-50 transition bg-white">Volver</button>
-            </div>
-          </div>
-        )}
         <Msg texto={msgPass} ok={okPass} />
       </div>
     </div>

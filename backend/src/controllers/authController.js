@@ -199,7 +199,7 @@ export const cambiarPassword = async (req, res) => {
   const userId = req.usuario._id.toString();
   const email = req.usuario.email;
   try {
-    const { actual, nueva, confirmar, captchaId, captcha } = req.body;
+    const { actual, nueva, confirmar } = req.body;
 
     const key = `pwd_attempts:${userId}`;
     const attempts = await pwdAttemptsGet(key);
@@ -219,22 +219,6 @@ export const cambiarPassword = async (req, res) => {
     if (!/(?=.*\d)/.test(nueva)) return res.status(400).json({ mensaje: "La contraseña debe tener al menos un número" });
     if (!/(?=.*[^A-Za-z0-9])/.test(nueva)) return res.status(400).json({ mensaje: "La contraseña debe tener al menos un símbolo" });
     if (confirmar && nueva !== confirmar) return res.status(400).json({ mensaje: "La confirmación no coincide" });
-    if (!captchaId || !captcha) {
-      await pwdAttemptsIncr(key, 15 * 60);
-      return res.status(400).json({ mensaje: "Captcha requerido" });
-    }
-
-    const stored = await captchaGet(`captcha:${captchaId}`);
-    if (!stored) {
-      await pwdAttemptsIncr(key, 15 * 60);
-      return res.status(400).json({ mensaje: "Captcha expirado, generá uno nuevo" });
-    }
-    if (stored !== captcha.toLowerCase()) {
-      await pwdAttemptsIncr(key, 15 * 60);
-      return res.status(400).json({ mensaje: "Captcha incorrecto" });
-    }
-
-    await captchaDel(`captcha:${captchaId}`);
 
     const usuario = await Usuario.findById(req.usuario._id).select("+password");
     const coincide = await usuario.compararPassword(actual);
