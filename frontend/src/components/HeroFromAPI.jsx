@@ -45,14 +45,14 @@ export function HeroFromAPI() {
       <div aria-hidden className="pointer-events-none absolute top-40 -left-16 w-72 h-72 rounded-full bg-lila-100 blur-3xl opacity-70" />
       <div aria-hidden className="pointer-events-none absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-60" style={{ background: "linear-gradient(135deg, #fbddec 0%, #f3e2f0 35%, #ddd0f7 100%)" }} />
 
-      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
-        <div>
+      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:gap-y-0 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
+        <div className="lg:col-start-1 lg:row-start-1">
           <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 md:text-center lg:text-left [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
             <TituloConCortes texto={hero.titulo} />
           </h1>
           <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md md:max-w-none md:text-center lg:text-left lg:max-w-md">{hero.descripcion}</p>
         </div>
-        <div>
+        <div className="lg:col-start-1 lg:row-start-2">
           <div className="mt-1 md:mt-0 lg:mt-7 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
             {mostrarTurnos && (
             <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-4 py-2 md:px-7 md:py-3.5 rounded-full text-xs md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
@@ -72,7 +72,7 @@ export function HeroFromAPI() {
         </div>
 
         {imagenes.length > 0 && (
-        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] overflow-hidden" style={{ borderRadius: "28px" }}>
+        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] lg:col-start-2 lg:row-start-1 lg:row-span-2 overflow-hidden" style={{ borderRadius: "28px" }}>
           {imagenes.map((src, i) => (
             <img
               key={src + i}
