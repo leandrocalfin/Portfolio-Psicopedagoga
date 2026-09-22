@@ -24,10 +24,13 @@ app.use(helmet({
   contentSecurityPolicy: false, // Lo configuramos abajo si se necesita CSP estricto
 }));
 
-// Rate limiting global (100 req/15min por IP)
+// Rate limiting global (300 req/15min por IP).
+// Solo cuentan las respuestas de error: la navegación legítima
+// (incluso con StrictMode que duplica los fetch en dev) nunca bloquea.
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
+  skipSuccessfulRequests: true,
   message: { mensaje: "Demasiadas solicitudes, intente más tarde" },
   standardHeaders: true,
   legacyHeaders: false,

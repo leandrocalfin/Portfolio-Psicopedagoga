@@ -98,11 +98,12 @@ import { uploadSingle, uploadMultiple as uploadMultipleMiddleware } from "../mid
 const router = Router();
 const adminLog = logAdminActionMiddleware;
 
-// Solo el login lleva rate limit estricto (20 intentos / 15 min por IP).
-// GET /me, logout, etc. no cuentan, para no bloquear falsamente.
+// Solo el login lleva rate limit estricto (20 intentos fallidos / 15 min por IP).
+// Los logins exitosos no cuentan; GET /me, logout, etc. tampoco.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
+  skipSuccessfulRequests: true,
   message: { mensaje: "Demasiados intentos de autenticación, intente en 15 minutos" },
   standardHeaders: true,
   legacyHeaders: false,
