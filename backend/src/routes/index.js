@@ -17,12 +17,14 @@ import {
   validateHorarios,
   validateConfig,
   validateAnuncio,
-  validateTurno,
+  validateAnuncioUpdate,
   validateReservarTurno,
   validateDeleteImagen,
   validateSignedUploadParams,
   validateRecaptcha,
   validateQuery,
+  validateAgenda,
+  validateAgendaUpdate,
 } from "../middleware/validators.js";
 import {
   login,
@@ -167,14 +169,14 @@ router.put("/config", proteger, adminLog("UPDATE", "config"), validateConfig, up
 // Anuncios / carteles flotantes (público leer, solo admin escribir)
 router.get("/anuncios", validateQuery, getAnuncios);
 router.post("/anuncios", proteger, adminLog("CREATE", "anuncio"), validateAnuncio, createAnuncio);
-router.put("/anuncios/:id", proteger, adminLog("UPDATE", "anuncio"), validateId, validateAnuncio, updateAnuncio);
+router.put("/anuncios/:id", proteger, adminLog("UPDATE", "anuncio"), validateId, validateAnuncioUpdate, updateAnuncio);
 router.delete("/anuncios/:id", proteger, adminLog("DELETE", "anuncio"), validateId, deleteAnuncio);
 
 // Agenda / Turnos
 router.get("/agenda", validateQuery, getTurnos);
 router.post("/agenda/reservar", validateReservarTurno, validateRecaptcha, reservarTurno);
-router.post("/agenda", proteger, adminLog("CREATE", "turno"), validateTurno, createTurno);
-router.put("/agenda/:id", proteger, adminLog("UPDATE", "turno"), validateId, validateTurno, updateTurno);
+router.post("/agenda", proteger, adminLog("CREATE", "turno"), validateAgenda, createTurno);
+router.put("/agenda/:id", proteger, adminLog("UPDATE", "turno"), validateId, validateAgendaUpdate, updateTurno);
 router.delete("/agenda/:id", proteger, adminLog("DELETE", "turno"), validateId, deleteTurno);
 
 // Upload imágenes (firmadas - cliente sube directo a Cloudinary)

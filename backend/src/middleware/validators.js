@@ -44,8 +44,6 @@ export const validateCambiarPassword = [
     .matches(/\d/).withMessage("Al menos un número")
     .matches(/[^A-Za-z0-9]/).withMessage("Al menos un símbolo"),
   body("confirmar").optional().custom((value, { req }) => value === req.body.nueva).withMessage("No coincide"),
-  body("captchaId").notEmpty().withMessage("Captcha requerido"),
-  body("captcha").notEmpty().withMessage("Captcha requerido"),
   handleValidation,
 ];
 
@@ -55,42 +53,45 @@ export const validateId = [
   handleValidation,
 ];
 
-// Hero validators
+// Hero: el front manda {titulo, descripcion, imagenes[]} (ver SeccionInicio).
 export const validateHero = [
   body("titulo").optional().trim().isLength({ max: 200 }).withMessage("Título máx 200 caracteres"),
-  body("subtitulo").optional().trim().isLength({ max: 500 }).withMessage("Subtítulo máx 500 caracteres"),
-  body("imagen").optional().isString(),
-  body("ctaTexto").optional().trim().isLength({ max: 50 }).withMessage("CTA máx 50 caracteres"),
-  body("ctaEnlace").optional().isURL().withMessage("Enlace inválido"),
+  body("descripcion").optional().trim().isLength({ max: 5000 }).withMessage("Descripción máx 5000 caracteres"),
+  body("imagenes").optional().isArray({ max: 5 }).withMessage("Máximo 5 imágenes"),
+  body("imagenes.*").optional().isString(),
   handleValidation,
 ];
 
-// SobreMi validators
+// SobreMi: el front manda {titulo, descripcion, imagen, items[], certificados[], mostrarLibro}.
 export const validateSobreMi = [
   body("titulo").optional().trim().isLength({ max: 200 }).withMessage("Título máx 200 caracteres"),
-  body("contenido").optional().trim().isLength({ max: 5000 }).withMessage("Contenido máx 5000 caracteres"),
+  body("descripcion").optional().trim().isLength({ max: 8000 }).withMessage("Descripción máx 8000 caracteres"),
   body("imagen").optional().isString(),
+  body("items").optional().isArray(),
+  body("certificados").optional().isArray(),
+  body("mostrarLibro").optional().isBoolean(),
   handleValidation,
 ];
 
-// Servicio validators
+// Servicio validators (el front siempre manda objeto completo).
 export const validateServicio = [
   body("titulo").trim().isLength({ min: 2, max: 150 }).withMessage("Título 2-150 caracteres"),
-  body("descripcion").trim().isLength({ min: 10, max: 2000 }).withMessage("Descripción 10-2000 caracteres"),
+  body("descripcion").trim().isLength({ min: 2, max: 2000 }).withMessage("Descripción 2-2000 caracteres"),
   body("icono").optional().trim().isLength({ max: 50 }),
   body("orden").optional().isInt({ min: 0 }).withMessage("Orden debe ser entero positivo"),
+  body("activo").optional().isBoolean(),
   handleValidation,
 ];
 
-// Articulo validators
+// Articulo: el front manda {titulo, descripcion, imagen, tag, cuerpo[]} (ver SeccionInformacion).
 export const validateArticulo = [
   body("titulo").trim().isLength({ min: 2, max: 200 }).withMessage("Título 2-200 caracteres"),
-  body("resumen").trim().isLength({ min: 10, max: 500 }).withMessage("Resumen 10-500 caracteres"),
-  body("contenido").trim().isLength({ min: 50 }).withMessage("Contenido mínimo 50 caracteres"),
+  body("descripcion").trim().isLength({ min: 2, max: 2000 }).withMessage("Descripción 2-2000 caracteres"),
   body("imagen").optional().isString(),
-  body("categoria").optional().trim().isLength({ max: 100 }),
-  body("etiquetas").optional().isArray(),
+  body("tag").optional().trim().isLength({ max: 100 }),
+  body("cuerpo").optional().isArray(),
   body("publicado").optional().isBoolean(),
+  body("orden").optional().isInt({ min: 0 }),
   handleValidation,
 ];
 
@@ -102,52 +103,89 @@ export const validateFAQ = [
   handleValidation,
 ];
 
-// DatosContacto validators
+// DatosContacto: el front manda {whatsapp, email, direccion, instagram, horariosTexto, mapsUrl}.
 export const validateDatosContacto = [
+  body("whatsapp").optional().trim().isLength({ max: 50 }),
   body("email").optional().isEmail().normalizeEmail().withMessage("Email inválido"),
-  body("telefono").optional().trim().isLength({ max: 50 }),
   body("direccion").optional().trim().isLength({ max: 200 }),
-  body("mapaUrl").optional().isURL().withMessage("URL de mapa inválida"),
-  body("horarios").optional().isArray(),
+  body("instagram").optional().trim().isLength({ max: 300 }),
+  body("horariosTexto").optional().trim().isLength({ max: 300 }),
+  body("mapsUrl").optional().trim().isLength({ max: 500 }),
   handleValidation,
 ];
 
-// Horarios validators
+// Horarios: el front manda {dias: [{dia: Lun..Dom, horas: [HH:MM]}]} (ver SeccionAgenda).
 export const validateHorarios = [
-  body("horarios").isArray().withMessage("Horarios debe ser array"),
-  body("horarios.*.dia").isIn(["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"]).withMessage("Día inválido"),
-  body("horarios.*.inicio").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Formato HH:MM"),
-  body("horarios.*.fin").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Formato HH:MM"),
-  body("horarios.*.activo").optional().isBoolean(),
+  body("dias").isArray().withMessage("Días debe ser array"),
+  body("dias.*.dia").isIn(["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]).withMessage("Día inválido"),
+  body("dias.*.horas").optional().isArray(),
+  body("dias.*.horas.*").optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Formato HH:MM"),
   handleValidation,
 ];
 
-// Config validators
+// Config: el front manda {turnosHabilitados, mensajeTurnosPausados}.
 export const validateConfig = [
-  body("sitioNombre").optional().trim().isLength({ max: 100 }),
-  body("sitioDescripcion").optional().trim().isLength({ max: 300 }),
-  body("logo").optional().isString(),
-  body("favicon").optional().isString(),
-  body("redesSociales").optional().isObject(),
+  body("turnosHabilitados").optional().isBoolean(),
+  body("mensajeTurnosPausados").optional().trim().isLength({ max: 500 }),
   handleValidation,
 ];
 
-// Anuncio validators
+// Anuncio: el front manda {titulo, mensaje, imagen, activo} (ver SeccionAnuncios).
 export const validateAnuncio = [
   body("titulo").trim().isLength({ min: 2, max: 200 }).withMessage("Título 2-200 caracteres"),
-  body("mensaje").trim().isLength({ min: 10, max: 1000 }).withMessage("Mensaje 10-1000 caracteres"),
-  body("tipo").isIn(["info", "warning", "success", "error"]).withMessage("Tipo inválido"),
+  body("mensaje").optional().trim().isLength({ max: 1000 }).withMessage("Mensaje máx 1000 caracteres"),
+  body("imagen").optional().isString(),
   body("activo").optional().isBoolean(),
-  body("posicion").optional().isIn(["top", "bottom"]).withMessage("Posición inválida"),
+  body("orden").optional().isInt({ min: 0 }),
   handleValidation,
 ];
 
-// Turno validators
-export const validateTurno = [
-  body("fecha").isISO8601().withMessage("Fecha inválida (ISO8601)"),
-  body("horaInicio").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Hora inicio HH:MM"),
-  body("horaFin").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Hora fin HH:MM"),
-  body("disponible").optional().isBoolean(),
+// Edición parcial de anuncios (ej. toggle {activo}).
+export const validateAnuncioUpdate = [
+  body("titulo").optional().trim().isLength({ min: 2, max: 200 }).withMessage("Título 2-200 caracteres"),
+  body("mensaje").optional().trim().isLength({ max: 1000 }).withMessage("Mensaje máx 1000 caracteres"),
+  body("imagen").optional().isString(),
+  body("activo").optional().isBoolean(),
+  body("orden").optional().isInt({ min: 0 }),
+  handleValidation,
+];
+
+// Agenda / Turnos (modelo Turno: dia, hora, nombre, apellido, detalle,
+// estado, fecha, notas, telefono, servicio, modalidad, origen).
+// El validateTurno anterior pedía fecha/horaInicio/horaFin de otro esquema
+// y rompía TODA creación y edición desde el admin.
+const DIAS_AGENDA = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const ESTADOS_TURNO = ["pendiente", "confirmado", "cancelado", "completado"];
+const HORA_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+export const validateAgenda = [
+  body("dia").isIn(DIAS_AGENDA).withMessage("Día inválido"),
+  body("hora").matches(HORA_RE).withMessage("Hora HH:MM"),
+  body("nombre").trim().isLength({ min: 2, max: 100 }).withMessage("Nombre 2-100 caracteres"),
+  body("apellido").optional().trim().isLength({ max: 100 }),
+  body("detalle").optional().trim().isLength({ max: 500 }),
+  body("notas").optional().trim().isLength({ max: 2000 }),
+  body("estado").optional().isIn(ESTADOS_TURNO).withMessage("Estado inválido"),
+  body("fecha").optional().isISO8601().withMessage("Fecha inválida (ISO8601)"),
+  body("telefono").optional().trim().isLength({ max: 50 }),
+  body("servicio").optional().trim().isLength({ max: 100 }),
+  body("modalidad").optional().trim().isLength({ max: 50 }),
+  handleValidation,
+];
+
+// Edición parcial (ej. solo { estado }): todo opcional.
+export const validateAgendaUpdate = [
+  body("dia").optional().isIn(DIAS_AGENDA).withMessage("Día inválido"),
+  body("hora").optional().matches(HORA_RE).withMessage("Hora HH:MM"),
+  body("nombre").optional().trim().isLength({ min: 2, max: 100 }).withMessage("Nombre 2-100 caracteres"),
+  body("apellido").optional().trim().isLength({ max: 100 }),
+  body("detalle").optional().trim().isLength({ max: 500 }),
+  body("notas").optional().trim().isLength({ max: 2000 }),
+  body("estado").optional().isIn(ESTADOS_TURNO).withMessage("Estado inválido"),
+  body("fecha").optional().isISO8601().withMessage("Fecha inválida (ISO8601)"),
+  body("telefono").optional().trim().isLength({ max: 50 }),
+  body("servicio").optional().trim().isLength({ max: 100 }),
+  body("modalidad").optional().trim().isLength({ max: 50 }),
   handleValidation,
 ];
 
