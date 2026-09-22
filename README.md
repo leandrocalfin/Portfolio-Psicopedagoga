@@ -1,4 +1,4 @@
-# Psicopedagoga — Estefani Salaya
+# Psicopedagoga — Estefani Salaya.
 
 Sitio institucional + panel administrador para la consulta psicopedagógica de **Lic. Salaya Estefani (MPRN 886)**.
 Incluye secciones públicas (inicio, servicios, sobre mí, información, preguntas frecuentes, contacto, turnos) y un panel admin para gestionar todo el contenido sin tocar código.
