@@ -8,6 +8,7 @@ import { ContactoFromAPI } from "./components/ContactoFromAPI.jsx";
 import Admin from "./Admin.jsx";
 import Turnos from "./Turnos.jsx";
 import { AnuncioFlotante } from "./components/AnuncioFlotante.jsx";
+import { useScrollReveal } from "./hooks/useScrollReveal.js";
 // Flag demo: true = muestra sección turnos + botón "Solicitar turno",
 // false = oculta todo lo de turnos sin borrar código.
 export const MOSTRAR_TURNOS = true;
@@ -301,15 +302,24 @@ export default function App() {
       <Navbar admin={false} />
       <main>
         <HeroFromAPI />
-        <ServiciosFromAPI />
-        <SobreMiFromAPI />
-        <InformacionFromAPI />
-        <FAQFromAPI />
-        <ContactoFromAPI />
+        <ScrollReveal><ServiciosFromAPI /></ScrollReveal>
+        <ScrollReveal><SobreMiFromAPI /></ScrollReveal>
+        <ScrollReveal><InformacionFromAPI /></ScrollReveal>
+        <ScrollReveal><FAQFromAPI /></ScrollReveal>
+        <ScrollReveal><ContactoFromAPI /></ScrollReveal>
       </main>
       <WhatsAppFlotante />
       <Footer />
       <AnuncioFlotante />
     </>
   );
+
+  function ScrollReveal({ children }) {
+    const [ref, visible] = useScrollReveal({ threshold: 0.08, rootMargin: "0px 0px -30px 0px" });
+    return (
+      <div ref={ref} className={`transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+        {children}
+      </div>
+    );
+  }
 }

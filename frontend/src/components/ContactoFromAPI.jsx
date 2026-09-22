@@ -1,17 +1,37 @@
 import { useDatos } from "../DataContext.jsx";
-import { MessageCircleHeart, Mail, MapPin, Check } from "lucide-react";
+import { MessageCircleHeart, Mail, MapPin, Check, Shield, Send } from "lucide-react";
 import { useState } from "react";
+import { api } from "../api.js";
+import { executeRecaptcha } from "../recaptcha.js";
 
 export function ContactoFromAPI() {
   const { datos } = useDatos();
   const contacto = datos.datosContacto;
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({ nombre: "", email: "", mensaje: "" });
 
   if (!contacto) return <section id="contacto" className="pink-lavender-bg py-16 scroll-mt-20 min-h-[calc(100svh-5rem)] flex items-center"><div className="max-w-5xl mx-auto px-5 w-full text-center text-stone-500">Cargando...</div></section>;
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setError("");
+    try {
+      const recaptchaToken = await executeRecaptcha("contacto");
+      await api.enviarContacto({ ...form, recaptchaToken });
+      setSent(true);
+      setForm({ nombre: "", email: "", mensaje: "" });
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <section id="contacto" className="pink-lavender-bg py-16 scroll-mt-20 min-h-[calc(100svh-5rem)] flex items-center">
+    <section id="contacto" className="pink-lavender-bg py-16 md:py-24 scroll-mt-20">
       <div className="max-w-5xl mx-auto px-5 w-full">
         <p className="text-xs tracking-[0.2em] uppercase text-lila-500 font-semibold text-center">Contacto</p>
         <h2 className="font-serif-display text-3xl md:text-[42px] leading-tight text-lila-900 text-center mt-2">¿Damos el primer paso?</h2>
@@ -29,11 +49,17 @@ export function ContactoFromAPI() {
             {sent ? (
               <div className="h-full min-h-[280px] flex flex-col items-center justify-center text-center gap-3"><span className="w-12 h-12 rounded-full bg-emerald-100 grid place-items-center"><Check size={22} className="text-emerald-700" /></span><p className="font-serif-display text-2xl text-lila-900">¡Mensaje enviado!</p><p className="text-sm text-stone-600">Te contactaremos muy pronto.</p><button onClick={() => setSent(false)} className="text-sm text-lila-700 underline mt-2">Volver</button></div>
             ) : (
-              <form onSubmit={(e) => { e.preventDefault(); setSent(true); setForm({ nombre: "", email: "", mensaje: "" }); }} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div><label className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold block mb-1">Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({...form, nombre: e.target.value})} required className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100 bg-white" /></div>
                 <div><label className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold block mb-1">Email</label><input type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} required className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100 bg-white" /></div>
                 <div><label className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold block mb-1">Mensaje</label><textarea rows={4} value={form.mensaje} onChange={(e) => setForm({...form, mensaje: e.target.value})} required className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100 bg-white resize-none" /></div>
-                <button type="submit" className="w-full inline-flex items-center justify-center gap-2 bg-lila-900 text-white text-xs font-semibold tracking-[0.15em] px-6 py-3 rounded-full hover:bg-lila-700 transition">Enviar mensaje</button>
+                {error && <p className="text-xs font-semibold text-red-600 text-center">{error}</p>}
+                <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-lila-900 text-white text-xs font-semibold tracking-[0.15em] px-6 py-3 rounded-full hover:bg-lila-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                  {submitting ? "Enviando..." : <>Enviar mensaje <Send size={14} /></>}
+                </button>
+                <p className="text-[11px] text-stone-400 text-center flex items-center justify-center gap-1">
+                  <Shield size={12} className="text-emerald-500" /> Protegido por reCAPTCHA v3
+                </p>
               </form>
             )}
           </div>

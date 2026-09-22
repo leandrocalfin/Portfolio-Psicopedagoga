@@ -5,7 +5,10 @@ import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import { connectDB } from "./config/db.js";
+import { connectRedis } from "./config/redis.js";
 import routes from "./routes/index.js";
 
 dotenv.config();
@@ -14,6 +17,31 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProd = process.env.NODE_ENV === "production";
+
+// Seguridad: Helmet headers
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  contentSecurityPolicy: false, // Lo configuramos abajo si se necesita CSP estricto
+}));
+
+// Rate limiting global (100 req/15min por IP)
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { mensaje: "Demasiadas solicitudes, intente más tarde" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use(globalLimiter);
+
+// Rate limiting estricto para auth (5 req/15min por IP)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { mensaje: "Demasiados intentos de autenticación, intente en 15 minutos" },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // Middlewares
 app.use(cors({
@@ -25,6 +53,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Rutas API
+app.use("/api/auth", authLimiter); // rate limit estricto en auth
 app.use("/api", routes);
 
 // Health check
@@ -69,21 +98,15 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ mensaje: "Error interno del servidor" });
 });
 
-// Error handler global
-app.use((err, _req, res, _next) => {
-  console.error(err.stack);
-  if (err.name === "ValidationError") {
-    return res.status(400).json({ mensaje: "Error de validación", errores: Object.values(err.errors).map(e => e.message) });
-  }
-  if (err.name === "MulterError") {
-    return res.status(400).json({ mensaje: "Error al subir archivo", error: err.message });
-  }
-  res.status(500).json({ mensaje: "Error interno del servidor" });
-});
-
 // Iniciar servidor (aunque falle Mongo, para no romper el proxy de Vite)
 const start = async () => {
   const dbOk = await connectDB();
+  try {
+    await connectRedis();
+    console.log("Redis: conectado");
+  } catch (e) {
+    console.warn("Redis: no conectado (captcha en memoria no persistirá entre reinicios)", e.message);
+  }
   app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
     console.log(`Entorno: ${process.env.NODE_ENV}`);

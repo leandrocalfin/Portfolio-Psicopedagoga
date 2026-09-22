@@ -95,7 +95,10 @@ export const api = {
   updateTurno: (id, data) => request(`/agenda/${id}`, { method: 'PUT', body: data }),
   deleteTurno: (id) => request(`/agenda/${id}`, { method: 'DELETE' }),
 
-  // Upload
+  // Contacto
+  enviarContacto: (data) => request('/contacto', { method: 'POST', body: data }),
+
+  // Upload (server-side - legacy)
   uploadImagen: (file, folder = 'psicopedagoga') => {
     const formData = new FormData();
     formData.append('imagen', file);
@@ -109,6 +112,32 @@ export const api = {
     return uploadFetch('/upload/multiple', formData);
   },
   deleteImagen: (publicId) => request('/upload', { method: 'DELETE', body: { publicId } }),
+
+  // Upload (signed - client direct to Cloudinary)
+  getSignedUploadParams: (folder = 'psicopedagoga', resourceType = 'image') =>
+    request('/upload/signed-params', { method: 'POST', body: { folder, resourceType } }),
+
+  uploadToCloudinary: async (file, signedParams) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', signedParams.apiKey);
+    formData.append('timestamp', signedParams.timestamp.toString());
+    formData.append('signature', signedParams.signature);
+    formData.append('public_id', signedParams.publicId);
+    formData.append('folder', signedParams.folder);
+    formData.append('resource_type', 'image');
+    formData.append('transformation', 'w_1200,h_1200,c_limit,q_auto');
+
+    const res = await fetch(signedParams.uploadUrl, {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.error?.message || `Error ${res.status}`);
+    }
+    return { url: data.secure_url, publicId: data.public_id };
+  },
 };
 
 // Compatibilidad: existen para no romper imports, pero ya no guardan nada.

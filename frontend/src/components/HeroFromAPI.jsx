@@ -70,7 +70,7 @@ export function HeroFromAPI() {
         </div>
 
         {imagenes.length > 0 && (
-        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[70vh] md:min-h-[520px] overflow-hidden" style={{ borderRadius: "28px" }}>
+        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] overflow-hidden" style={{ borderRadius: "28px" }}>
           {imagenes.map((src, i) => (
             <img
               key={src + i}

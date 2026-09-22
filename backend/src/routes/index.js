@@ -1,5 +1,28 @@
 import { Router } from "express";
 import { proteger } from "../middleware/auth.js";
+import { logAdminActionMiddleware } from "../middleware/adminLogger.js";
+import {
+  validateLogin,
+  validateRegister,
+  validateUpdatePerfil,
+  validateCambiarPassword,
+  validateId,
+  validateHero,
+  validateSobreMi,
+  validateServicio,
+  validateArticulo,
+  validateFAQ,
+  validateDatosContacto,
+  validateHorarios,
+  validateConfig,
+  validateAnuncio,
+  validateTurno,
+  validateReservarTurno,
+  validateDeleteImagen,
+  validateSignedUploadParams,
+  validateRecaptcha,
+  validateQuery,
+} from "../middleware/validators.js";
 import {
   login,
   register,
@@ -61,22 +84,27 @@ import {
   reservarTurno,
 } from "../controllers/turnoController.js";
 import {
+  enviarContacto,
+} from "../controllers/contactoController.js";
+import {
   uploadImagen,
   uploadMultiple,
   deleteImagen,
+  getSignedUploadParams,
 } from "../controllers/uploadController.js";
 import { uploadSingle, uploadMultiple as uploadMultipleMiddleware } from "../middleware/upload.js";
 
 const router = Router();
+const adminLog = logAdminActionMiddleware;
 
 // Auth (públicas)
-router.post("/auth/login", login);
-router.post("/auth/register", register);
+router.post("/auth/login", validateLogin, login);
+router.post("/auth/register", validateRegister, register);
 
 // Auth (protegidas)
 router.get("/auth/me", proteger, me);
-router.put("/auth/perfil", proteger, updatePerfil);
-router.put("/auth/password", proteger, cambiarPassword);
+router.put("/auth/perfil", proteger, adminLog("UPDATE", "perfil"), validateUpdatePerfil, updatePerfil);
+router.put("/auth/password", proteger, adminLog("UPDATE", "password"), validateCambiarPassword, cambiarPassword);
 router.post("/auth/logout", logout);
 
 // Captcha (público)
@@ -85,58 +113,64 @@ router.get("/auth/captcha", getCaptcha);
 
 // Hero
 router.get("/hero", getHero);
-router.put("/hero", proteger, updateHero);
+router.put("/hero", proteger, adminLog("UPDATE", "hero"), validateHero, updateHero);
 
 // Sobre Mí
 router.get("/sobre-mi", getSobreMi);
-router.put("/sobre-mi", proteger, updateSobreMi);
+router.put("/sobre-mi", proteger, adminLog("UPDATE", "sobre_mi"), validateSobreMi, updateSobreMi);
 
 // Servicios
-router.get("/servicios", getServicios);
-router.post("/servicios", proteger, createServicio);
-router.put("/servicios/:id", proteger, updateServicio);
-router.delete("/servicios/:id", proteger, deleteServicio);
+router.get("/servicios", validateQuery, getServicios);
+router.post("/servicios", proteger, adminLog("CREATE", "servicio"), validateServicio, createServicio);
+router.put("/servicios/:id", proteger, adminLog("UPDATE", "servicio"), validateId, validateServicio, updateServicio);
+router.delete("/servicios/:id", proteger, adminLog("DELETE", "servicio"), validateId, deleteServicio);
 
 // Información / Artículos
-router.get("/informacion", getArticulos);
-router.post("/informacion", proteger, createArticulo);
-router.put("/informacion/:id", proteger, updateArticulo);
-router.delete("/informacion/:id", proteger, deleteArticulo);
+router.get("/informacion", validateQuery, getArticulos);
+router.post("/informacion", proteger, adminLog("CREATE", "articulo"), validateArticulo, createArticulo);
+router.put("/informacion/:id", proteger, adminLog("UPDATE", "articulo"), validateId, validateArticulo, updateArticulo);
+router.delete("/informacion/:id", proteger, adminLog("DELETE", "articulo"), validateId, deleteArticulo);
 
 // FAQs
-router.get("/faqs", getFAQs);
-router.post("/faqs", proteger, createFAQ);
-router.put("/faqs/:id", proteger, updateFAQ);
-router.delete("/faqs/:id", proteger, deleteFAQ);
+router.get("/faqs", validateQuery, getFAQs);
+router.post("/faqs", proteger, adminLog("CREATE", "faq"), validateFAQ, createFAQ);
+router.put("/faqs/:id", proteger, adminLog("UPDATE", "faq"), validateId, validateFAQ, updateFAQ);
+router.delete("/faqs/:id", proteger, adminLog("DELETE", "faq"), validateId, deleteFAQ);
 
 // Datos de contacto
 router.get("/datos", getDatosContacto);
-router.put("/datos", proteger, updateDatosContacto);
+router.put("/datos", proteger, adminLog("UPDATE", "datos_contacto"), validateDatosContacto, updateDatosContacto);
+
+// Contacto form (público con reCAPTCHA)
+router.post("/contacto", validateRecaptcha, enviarContacto);
 
 // Horarios de atención
 router.get("/horarios", getHorarios);
-router.put("/horarios", proteger, updateHorarios);
+router.put("/horarios", proteger, adminLog("UPDATE", "horarios"), validateHorarios, updateHorarios);
 
 // Config del sitio (pública lectura, solo admin escribe)
 router.get("/config", getConfig);
-router.put("/config", proteger, updateConfig);
+router.put("/config", proteger, adminLog("UPDATE", "config"), validateConfig, updateConfig);
 
 // Anuncios / carteles flotantes (público leer, solo admin escribir)
-router.get("/anuncios", getAnuncios);
-router.post("/anuncios", proteger, createAnuncio);
-router.put("/anuncios/:id", proteger, updateAnuncio);
-router.delete("/anuncios/:id", proteger, deleteAnuncio);
+router.get("/anuncios", validateQuery, getAnuncios);
+router.post("/anuncios", proteger, adminLog("CREATE", "anuncio"), validateAnuncio, createAnuncio);
+router.put("/anuncios/:id", proteger, adminLog("UPDATE", "anuncio"), validateId, validateAnuncio, updateAnuncio);
+router.delete("/anuncios/:id", proteger, adminLog("DELETE", "anuncio"), validateId, deleteAnuncio);
 
 // Agenda / Turnos
-router.get("/agenda", getTurnos);
-router.post("/agenda/reservar", reservarTurno);
-router.post("/agenda", proteger, createTurno);
-router.put("/agenda/:id", proteger, updateTurno);
-router.delete("/agenda/:id", proteger, deleteTurno);
+router.get("/agenda", validateQuery, getTurnos);
+router.post("/agenda/reservar", validateReservarTurno, validateRecaptcha, reservarTurno);
+router.post("/agenda", proteger, adminLog("CREATE", "turno"), validateTurno, createTurno);
+router.put("/agenda/:id", proteger, adminLog("UPDATE", "turno"), validateId, validateTurno, updateTurno);
+router.delete("/agenda/:id", proteger, adminLog("DELETE", "turno"), validateId, deleteTurno);
 
-// Upload imágenes
-router.post("/upload", proteger, uploadSingle("imagen"), uploadImagen);
-router.post("/upload/multiple", proteger, uploadMultipleMiddleware("imagenes", 5), uploadMultiple);
-router.delete("/upload", proteger, deleteImagen);
+// Upload imágenes (firmadas - cliente sube directo a Cloudinary)
+router.post("/upload/signed-params", proteger, adminLog("GET_SIGNED_PARAMS", "upload"), validateSignedUploadParams, getSignedUploadParams);
+
+// Upload imágenes (server-side - legado/compatibilidad)
+router.post("/upload", proteger, adminLog("UPLOAD", "imagen"), uploadSingle("imagen"), uploadImagen);
+router.post("/upload/multiple", proteger, adminLog("UPLOAD", "imagenes"), uploadMultipleMiddleware("imagenes", 5), uploadMultiple);
+router.delete("/upload", proteger, adminLog("DELETE", "imagen"), validateDeleteImagen, deleteImagen);
 
 export default router;

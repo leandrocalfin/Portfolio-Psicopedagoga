@@ -1,6 +1,7 @@
 import { useDatos } from "../DataContext.jsx";
 import { useState, useEffect } from "react";
 import { X, ChevronDown } from "lucide-react";
+import { useStaggeredReveal } from "../hooks/useScrollReveal.js";
 
 export function InformacionFromAPI() {
   const { datos } = useDatos();
@@ -21,6 +22,8 @@ export function InformacionFromAPI() {
   const visibles = ordenados.slice(inicio, inicio + porPagina);
   const irA = (p) => { setPagina(p); document.getElementById("informacion")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
 
+  const [setRef, visibleIndices] = useStaggeredReveal(visibles.length, { threshold: 0.08, rootMargin: "0px 0px -30px 0px" });
+
   if (!articulos.length) return <section id="informacion" className="bg-lila-50/60 py-16 scroll-mt-20"><div className="max-w-6xl mx-auto px-5 text-center text-stone-500">Cargando artículos...</div></section>;
 
   return (
@@ -29,16 +32,26 @@ export function InformacionFromAPI() {
         <p className="text-xs tracking-[0.2em] uppercase text-lila-500 font-semibold text-center">Información</p>
         <h2 className="font-serif-display text-3xl md:text-4xl text-lila-900 text-center mt-2">Información, tips y recomendaciones</h2>
         <div className="mt-8 grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-          {visibles.map((a, i) => (
-            <article key={a._id || inicio + i} onClick={() => setSel(inicio + i)} className="bg-white rounded-2xl overflow-hidden card-shadow hover:-translate-y-1 transition flex flex-col cursor-pointer">
-              {a.imagen && <img src={a.imagen} alt={a.titulo} className="w-full h-40 object-contain bg-lila-50/60" />}
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="font-serif-display text-lg leading-snug text-lila-900 mt-1 line-clamp-2">{a.titulo}</h3>
-                <p className="text-[13px] text-stone-600 mt-1.5 leading-relaxed flex-1 line-clamp-2">{a.descripcion}</p>
-                <span className="mt-3 self-center text-[13px] font-semibold text-lila-700 underline underline-offset-4">Leer más</span>
-              </div>
-            </article>
-          ))}
+          {visibles.map((a, i) => {
+            const visible = visibleIndices.has(i);
+            return (
+              <article
+                key={a._id || inicio + i}
+                ref={setRef(i)}
+                onClick={() => setSel(inicio + i)}
+                className={`transition-all duration-700 ease-out ${visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-95"}`}
+              >
+                <div className="bg-white rounded-2xl overflow-hidden card-shadow hover:-translate-y-1 transition flex flex-col cursor-pointer">
+                  {a.imagen && <img src={a.imagen} alt={a.titulo} className="w-full h-40 object-contain bg-lila-50/60" />}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="font-serif-display text-lg leading-snug text-lila-900 mt-1 line-clamp-2">{a.titulo}</h3>
+                    <p className="text-[13px] text-stone-600 mt-1.5 leading-relaxed flex-1 line-clamp-2">{a.descripcion}</p>
+                    <span className="mt-3 self-center text-[13px] font-semibold text-lila-700 underline underline-offset-4">Leer más</span>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
         </div>
         {totalPaginas > 1 && (
           <div className="mt-8 flex items-center justify-center gap-3">
