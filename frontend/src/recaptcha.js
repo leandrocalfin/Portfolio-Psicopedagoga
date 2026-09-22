@@ -22,13 +22,21 @@ export const loadRecaptcha = () => {
     script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`;
     script.async = true;
     script.defer = true;
+    let intentos = 0;
     script.onload = () => {
       recaptchaLoaded = true;
-      // Esperar a que grecaptcha esté listo
+      // Esperar a que grecaptcha esté COMPLETO (api.js lo define por partes:
+      // el objeto aparece antes que .execute y resolver antes rompe con
+      // "t.execute is not a function").
       const checkReady = setInterval(() => {
-        if (window.grecaptcha) {
+        intentos += 1;
+        if (window.grecaptcha && typeof window.grecaptcha.execute === "function") {
           clearInterval(checkReady);
           resolve(window.grecaptcha);
+        } else if (intentos > 100) {
+          clearInterval(checkReady);
+          console.error("reCAPTCHA no terminó de inicializarse");
+          resolve(null);
         }
       }, 100);
     };
