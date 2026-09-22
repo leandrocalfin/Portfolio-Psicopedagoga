@@ -64,7 +64,7 @@ export function HeroFromAPI() {
       <div aria-hidden className="pointer-events-none absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-60" style={{ background: "linear-gradient(135deg, #fbddec 0%, #f3e2f0 35%, #ddd0f7 100%)" }} />
 
       <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:gap-y-0 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
-        <div className="lg:col-start-1 lg:row-start-1">
+        <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
           <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 md:text-center lg:text-left [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
             <TituloConCortes texto={hero.titulo} />
           </h1>
@@ -77,7 +77,7 @@ export function HeroFromAPI() {
             </div>
           )}
         </div>
-        <div className="lg:col-start-1 lg:row-start-2">
+        <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
           <div className="mt-1 md:mt-0 lg:mt-4 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
             {mostrarTurnos && (
             <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-4 py-2 md:px-7 md:py-3.5 rounded-full text-xs md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
