@@ -31,7 +31,8 @@ app.get("/health", (_, res) => res.json({ status: "ok", timestamp: new Date().to
 
 // Servir frontend en producción
 if (isProd) {
-  const distPath = path.join(__dirname, "../../frontend/dist");
+  // Render usa working dir = root del repo, backend está en /backend
+  const distPath = path.join(__dirname, "../../../frontend/dist");
   app.use(express.static(distPath));
   app.get("*", (_, res) => {
     res.sendFile(path.join(distPath, "index.html"));
