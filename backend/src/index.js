@@ -32,20 +32,26 @@ app.get("/health", (_, res) => res.json({ status: "ok", timestamp: new Date().to
 
 // Servir frontend en producción
 if (isProd) {
-  // Render: working dir puede ser /opt/render/project/src
-  // backend/src/index.js -> ../../../frontend/dist o ../../../../frontend/dist
+  // backend/src/index.js -> ../../frontend/dist en local y Render
   const candidates = [
-    path.join(__dirname, "../../../frontend/dist"),   // /opt/render/project/frontend/dist
-    path.join(__dirname, "../../../../frontend/dist"), // /opt/render/project/src/frontend/dist
+    path.join(__dirname, "../../frontend/dist"),
+    path.join(__dirname, "../../../frontend/dist"),
+    path.join(process.cwd(), "frontend/dist"),
+    path.join(process.cwd(), "../frontend/dist"),
   ];
-  const distPath = candidates.find(p => {
-    try { return require('fs').existsSync(path.join(p, "index.html")); } catch { return false; }
-  }) || candidates[0];
-  
-  app.use(express.static(distPath));
-  app.get("*", (_, res) => {
-    res.sendFile(path.join(distPath, "index.html"));
+  const distPath = candidates.find((p) => {
+    try { return fs.existsSync(path.join(p, "index.html")); } catch { return false; }
   });
+
+  if (!distPath) {
+    console.error("Frontend dist no encontrado. Candidatos:", candidates);
+  } else {
+    console.log("Sirviendo frontend desde:", distPath);
+    app.use(express.static(distPath));
+    app.get("*", (_, res) => {
+      res.sendFile(path.join(distPath, "index.html"));
+    });
+  }
 } else {
   // 404 solo para API en desarrollo
   app.use("/api/*", (_, res) => res.status(404).json({ mensaje: "Ruta no encontrada" }));
