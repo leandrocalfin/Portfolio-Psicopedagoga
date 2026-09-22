@@ -56,7 +56,7 @@ export function TurnosFromAPI() {
       <div className="xl:grid xl:grid-cols-5 gap-3 overflow-x-auto xl:overflow-visible pb-2 xl:pb-0 snap-x snap-mandatory w-full max-w-full">
         {DIAS.map(dia => {
           const turnosDia = turnos[dia] || [];
-          const horasHabilitadas = horarios.find(h => h.dia === dia)?.horas || [];
+          const horasHabilitadas = [...new Set(horarios.filter(h => h.dia === dia).flatMap(h => h.horas || []))].sort();
           return (
             <div key={dia} className="min-w-[80%] sm:min-w-[calc(50%-6px)] xl:min-w-0 shrink-0 snap-start border border-stone-200 rounded-2xl overflow-hidden bg-white">
               <p className="text-[11px] font-bold tracking-[0.15em] text-center text-stone-500 bg-lila-50/60 py-2.5 uppercase">{dia}</p>

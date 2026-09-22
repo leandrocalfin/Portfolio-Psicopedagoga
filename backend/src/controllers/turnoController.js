@@ -49,9 +49,25 @@ export const reservarTurno = async (req, res) => {
       return res.status(400).json({ mensaje: "Día, hora, nombre y teléfono son requeridos" });
     }
 
-    // 1) La hora tiene que estar habilitada para ese día
+    // 1) La hora tiene que estar habilitada para ese día+semana.
+    // Semana 1 = próximos 5 días hábiles, semana 2 = siguientes 5.
+    // Entradas sin semana (viejas) valen para ambas.
+    const semanaDeFecha = (fechaISO) => {
+      const fechas = [];
+      const d = new Date();
+      while (fechas.length < 10) {
+        d.setDate(d.getDate() + 1);
+        const dow = d.getDay();
+        if (dow >= 1 && dow <= 5) fechas.push(d.toISOString().slice(0, 10));
+      }
+      const i = fechas.indexOf(String(fechaISO || "").slice(0, 10));
+      return i < 0 ? 1 : i < 5 ? 1 : 2;
+    };
     const horarios = await HorariosAtencion.findOne();
-    const habilitadas = horarios?.dias?.find((d) => d.dia === dia)?.horas || [];
+    const sem = semanaDeFecha(fecha);
+    const cands = (horarios?.dias || []).filter((e) => e.dia === dia);
+    const entry = cands.find((e) => Number(e.semana) === sem) || cands.find((e) => e.semana == null);
+    const habilitadas = entry?.horas || [];
     if (habilitadas.length && !habilitadas.includes(hora)) {
       return res.status(400).json({ mensaje: "Ese horario no está habilitado" });
     }

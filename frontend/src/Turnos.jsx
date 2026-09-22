@@ -4,6 +4,7 @@ import { useDatos } from "./DataContext.jsx";
 import { api } from "./api.js";
 import { executeRecaptcha } from "./recaptcha.js";
 import { getConsent, pedirConsentimiento } from "./cookies.js";
+import { proximasFechas, horasPara } from "./semanas.js";
 
 const MODALIDADES = [
   { id: "presencial", label: "Presencial", icon: Building2 },
@@ -20,25 +21,6 @@ const SERVICIOS_TURNO = [
 ];
 
 const HORAS_FALLBACK = ["09:00", "10:00", "11:00", "12:00", "14:00", "15:00", "16:00", "17:00"];
-const DIAS_SEMANA = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-
-function proximasFechas(n = 10) {
-  const dias = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-  const meses = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sept", "Oct", "Nov", "Dic"];
-  const out = [];
-  const d = new Date();
-  while (out.length < n) {
-    d.setDate(d.getDate() + 1);
-    const dow = d.getDay();
-    if (dow >= 1 && dow <= 5) {
-      out.push({
-        id: d.toISOString().slice(0, 10),
-        etiqueta: `${dias[dow]}, ${d.getDate()} ${meses[d.getMonth()]}`,
-      });
-    }
-  }
-  return out;
-}
 
 export default function Turnos() {
   const fechas = useMemo(() => proximasFechas(10), []);
@@ -123,18 +105,27 @@ export default function Turnos() {
     }
   };
 
-  // Horas habilitadas por la admin para el día de la fecha elegida.
+  // Horas habilitadas por la admin para la fecha elegida (plantilla según semana 1 o 2).
   // Si aún no cargó la config, se usa el fallback.
-  const diaDeFecha = fecha ? DIAS_SEMANA[new Date(fecha + "T12:00:00").getDay()] : null;
-  const horasHabilitadas = diaDeFecha
-    ? (datos.horarios?.dias?.find((d) => d.dia === diaDeFecha)?.horas ?? HORAS_FALLBACK)
-    : HORAS_FALLBACK;
-  // Horas ocupadas (pendiente/confirmado) para ese día.
+  const fechaSel = fechas.find((f) => f.id === fecha);
+  const diaDeFecha = fechaSel ? fechaSel.dia : null;
+  const docDias = datos.horarios?.dias;
+  const horasHabilitadas = !diaDeFecha
+    ? HORAS_FALLBACK
+    : !docDias
+      ? HORAS_FALLBACK
+      : (horasPara(diaDeFecha, fechaSel.semana, docDias) ?? HORAS_FALLBACK);
+  // Horas ocupadas (pendiente/confirmado) para esa fecha exacta.
+  // Turnos viejos sin fecha se comparan por día de semana (aprox.).
   const ocupadas = diaDeFecha
     ? new Set(
         Object.entries(datos.turnos || {})
           .flatMap(([, arr]) => arr || [])
-          .filter((t) => (t.dia === diaDeFecha || (t.fecha && String(t.fecha).slice(0, 10) === fecha)) && ["pendiente", "confirmado"].includes(t.estado))
+          .filter((t) => {
+            const f = t.fecha ? String(t.fecha).slice(0, 10) : null;
+            const coincide = f ? f === fecha : t.dia === diaDeFecha;
+            return coincide && ["pendiente", "confirmado"].includes(t.estado);
+          })
           .map((t) => t.hora)
       )
     : new Set();

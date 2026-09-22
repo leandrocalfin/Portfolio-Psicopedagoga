@@ -118,6 +118,7 @@ export const validateDatosContacto = [
 export const validateHorarios = [
   body("dias").isArray().withMessage("Días debe ser array"),
   body("dias.*.dia").isIn(["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]).withMessage("Día inválido"),
+  body("dias.*.semana").optional().isIn([1, 2]).withMessage("Semana inválida"),
   body("dias.*.horas").optional().isArray(),
   body("dias.*.horas.*").optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Formato HH:MM"),
   handleValidation,

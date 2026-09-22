@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { proximasFechas, fechaCorta } from "./semanas.js";
 import {
   Home,
   User,
@@ -1083,15 +1084,18 @@ const GRILLA_HORAS = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:
 
 function SeccionAgenda() {
   const { datos, recargar } = useDatos();
+  const fechas = useMemo(() => proximasFechas(10), []);
   const [filtro, setFiltro] = useState("todos");
   const [diaSel, setDiaSel] = useState("todos");
-  const [form, setForm] = useState({ dia: "Lun", hora: "", nombre: "", detalle: "", estado: "pendiente", fecha: "", notas: "" });
+  const FORM_VACIO = { dia: "Lun", hora: "", nombre: "", apellido: "", telefono: "", servicio: "", modalidad: "", detalle: "", estado: "pendiente", fecha: "", notas: "" };
+  const [form, setForm] = useState(FORM_VACIO);
   const [edit, setEdit] = useState(null);
   const [mostrarNuevo, setMostrarNuevo] = useState(false);
   const [msg, setMsg] = useState("");
   const [ok, setOk] = useState(false);
   const [mostrarHorarios, setMostrarHorarios] = useState(false);
-  const [horasEdit, setHorasEdit] = useState({});
+  const [semanaH, setSemanaH] = useState(1);
+  const [horasEdit, setHorasEdit] = useState({ 1: {}, 2: {} });
   const [guardandoHoras, setGuardandoHoras] = useState(false);
   const [borradores, setBorradores] = useState({});
   const [guardandoCambios, setGuardandoCambios] = useState(false);
@@ -1099,36 +1103,52 @@ function SeccionAgenda() {
   const cambiosPendientes = Object.keys(borradores).length;
 
   useEffect(() => {
-    const mapa = {};
-    DIAS.forEach((d) => { mapa[d] = []; });
-    (datos.horarios?.dias || []).forEach((h) => { mapa[h.dia] = [...(h.horas || [])]; });
+    const mapa = { 1: {}, 2: {} };
+    DIAS.forEach((d) => { mapa[1][d] = []; mapa[2][d] = []; });
+    // Entradas sin semana (viejas) valen para ambas.
+    (datos.horarios?.dias || []).forEach((h) => {
+      const hs = [...(h.horas || [])];
+      if (h.semana == null) { mapa[1][h.dia] = hs; mapa[2][h.dia] = hs; }
+      else if (mapa[h.semana]) mapa[h.semana][h.dia] = hs;
+    });
     setHorasEdit(mapa);
   }, [datos.horarios]);
 
   const toggleHora = (dia, hora) => {
     setHorasEdit((m) => ({
       ...m,
-      [dia]: (m[dia] || []).includes(hora) ? m[dia].filter((h) => h !== hora) : [...(m[dia] || []), hora].sort(),
+      [semanaH]: {
+        ...m[semanaH],
+        [dia]: (m[semanaH][dia] || []).includes(hora) ? m[semanaH][dia].filter((h) => h !== hora) : [...(m[semanaH][dia] || []), hora].sort(),
+      },
     }));
   };
 
   const guardarHorarios = async () => {
     setGuardandoHoras(true);
     try {
-      await api.updateHorarios({ dias: DIAS.map((dia) => ({ dia, horas: horasEdit[dia] || [] })) });
+      const otra = semanaH === 1 ? 2 : 1;
+      // Se conserva la otra semana y se reemplaza la editada (con etiqueta de semana).
+      const conservadas = (datos.horarios?.dias || []).filter((e) => Number(e.semana) === otra);
+      const nuevas = DIAS.map((dia) => ({ dia, semana: semanaH, horas: horasEdit[semanaH][dia] || [] }));
+      await api.updateHorarios({ dias: [...conservadas, ...nuevas] });
       recargar("horarios");
-      setMsg("Horarios guardados ✓");
+      setMsg(`Horarios de semana ${semanaH} guardados ✓`);
       setOk(true);
     } catch (e) { setMsg(e.message); setOk(false); }
     finally { setGuardandoHoras(false); }
   };
 
+  const fechaDe = (t) => (t.fecha ? String(t.fecha).slice(0, 10) : null);
   const lista = Object.entries(datos.turnos || {}).flatMap(([dia, arr]) =>
     (arr || []).map((t) => ({ ...t, dia: t.dia || dia }))
   );
-  const porDia = (d) => lista.filter((t) => t.dia === d);
+  const porFecha = (id) => lista.filter((t) => fechaDe(t) === id);
+  const sinFecha = lista.filter((t) => !fechaDe(t));
   const filtrada = lista.filter(
-    (t) => (filtro === "todos" || t.estado === filtro) && (diaSel === "todos" || t.dia === diaSel)
+    (t) =>
+      (filtro === "todos" || t.estado === filtro) &&
+      (diaSel === "todos" || (diaSel === "sin-fecha" ? !fechaDe(t) : fechaDe(t) === diaSel))
   );
 
   const guardar = async () => {
@@ -1138,6 +1158,10 @@ function SeccionAgenda() {
         dia: form.dia,
         hora: form.hora.trim(),
         nombre: form.nombre.trim(),
+        apellido: form.apellido.trim(),
+        telefono: form.telefono.trim(),
+        servicio: form.servicio.trim(),
+        modalidad: form.modalidad,
         detalle: form.detalle.trim(),
         estado: form.estado,
         notas: form.notas.trim(),
@@ -1148,7 +1172,7 @@ function SeccionAgenda() {
       setOk(true);
       setMsg(edit ? "Turno guardado ✓" : "Turno creado ✓");
       recargar("turnos");
-      setForm({ dia: "Lun", hora: "", nombre: "", detalle: "", estado: "pendiente", fecha: "", notas: "" });
+      setForm(FORM_VACIO);
       setEdit(null);
       setMostrarNuevo(false);
     } catch (e) { setMsg(e.message); setOk(false); }
@@ -1198,6 +1222,10 @@ function SeccionAgenda() {
       dia: t.dia || "Lun",
       hora: t.hora || "",
       nombre: t.nombre || "",
+      apellido: t.apellido || "",
+      telefono: t.telefono || "",
+      servicio: t.servicio || "",
+      modalidad: t.modalidad || "",
       detalle: t.detalle || "",
       estado: t.estado || "pendiente",
       fecha: t.fecha ? new Date(t.fecha).toISOString().slice(0, 10) : "",
@@ -1215,15 +1243,21 @@ function SeccionAgenda() {
       </div>
       <div className="grid sm:grid-cols-2 gap-3">
         <div><p className={labelCls}>Nombre</p><input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} placeholder="Nombre del paciente" className={`${inputCls} mt-1.5`} /></div>
-        <div><p className={labelCls}>Detalle</p><input value={form.detalle} onChange={(e) => setForm({ ...form, detalle: e.target.value })} placeholder="Evaluación / Seguimiento / Online" className={`${inputCls} mt-1.5`} /></div>
+        <div><p className={labelCls}>Apellido</p><input value={form.apellido} onChange={(e) => setForm({ ...form, apellido: e.target.value })} placeholder="Apellido del paciente" className={`${inputCls} mt-1.5`} /></div>
       </div>
+      <div className="grid sm:grid-cols-3 gap-3">
+        <div><p className={labelCls}>Teléfono</p><input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} placeholder="WhatsApp" className={`${inputCls} mt-1.5`} /></div>
+        <div><p className={labelCls}>Servicio</p><input value={form.servicio} onChange={(e) => setForm({ ...form, servicio: e.target.value })} placeholder="Motivo / servicio" className={`${inputCls} mt-1.5`} /></div>
+        <div><p className={labelCls}>Modalidad</p><select value={form.modalidad} onChange={(e) => setForm({ ...form, modalidad: e.target.value })} className={`${inputCls} mt-1.5`}><option value="">—</option><option value="presencial">Presencial</option><option value="online">Online</option></select></div>
+      </div>
+      <div><p className={labelCls}>Detalle</p><input value={form.detalle} onChange={(e) => setForm({ ...form, detalle: e.target.value })} placeholder="Evaluación / Seguimiento / Online" className={`${inputCls} mt-1.5`} /></div>
       <div className="grid sm:grid-cols-2 gap-3">
         <div><p className={labelCls}>Fecha (opcional)</p><input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className={`${inputCls} mt-1.5`} /></div>
         <div><p className={labelCls}>Notas privadas</p><input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Solo visible para admin" className={`${inputCls} mt-1.5`} /></div>
       </div>
       <div className="flex gap-2 flex-wrap">
         <button onClick={guardar} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition"><Save size={15} /> Guardar</button>
-        <button onClick={() => { setEdit(null); setMostrarNuevo(false); setForm({ dia: "Lun", hora: "", nombre: "", detalle: "", estado: "pendiente", fecha: "", notas: "" }); }} className="inline-flex items-center gap-2 border border-stone-200 text-stone-600 text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-stone-50 transition bg-white">Cancelar</button>
+        <button onClick={() => { setEdit(null); setMostrarNuevo(false); setForm(FORM_VACIO); }} className="inline-flex items-center gap-2 border border-stone-200 text-stone-600 text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-stone-50 transition bg-white">Cancelar</button>
       </div>
     </div>
   );
@@ -1277,7 +1311,7 @@ function SeccionAgenda() {
         </>
         )}
       </div>
-      {/* Horarios habilitados por día */}
+      {/* Horarios habilitados por día y por semana */}
       <div className="rounded-2xl border border-stone-200 bg-white overflow-hidden">
         <button onClick={() => setMostrarHorarios(!mostrarHorarios)} className="w-full flex items-center justify-between px-4 py-3 text-left">
           <p className="text-sm font-bold text-lila-900">Horarios habilitados {mostrarHorarios ? "▾" : "▸"}</p>
@@ -1285,13 +1319,23 @@ function SeccionAgenda() {
         </button>
         {mostrarHorarios && (
           <div className="px-4 pb-4 space-y-3 border-t border-stone-100 pt-3">
+            <div className="flex items-center justify-center gap-3">
+              <button onClick={() => setSemanaH(1)} aria-label="Semana anterior" className="w-8 h-8 rounded-full border border-stone-200 grid place-items-center text-lila-900 hover:bg-lila-50 transition disabled:opacity-30" disabled={semanaH === 1}>‹</button>
+              <p className="text-xs font-bold text-lila-900">Semana {semanaH} <span className="font-normal text-stone-400">({semanaH === 1 ? "próx. 5 días hábiles" : "siguientes 5"})</span></p>
+              <button onClick={() => setSemanaH(2)} aria-label="Semana siguiente" className="w-8 h-8 rounded-full border border-stone-200 grid place-items-center text-lila-900 hover:bg-lila-50 transition disabled:opacity-30" disabled={semanaH === 2}>›</button>
+            </div>
             {DIAS.map((d) => (
               <div key={d} className="flex items-start gap-3">
                 <span className="w-10 shrink-0 text-xs font-bold text-lila-900 pt-2 text-center">{d}</span>
                 <div className="grid flex-1 grid-cols-6 sm:grid-cols-11 gap-1">
                   {GRILLA_HORAS.map((h) => {
-                    const on = (horasEdit[d] || []).includes(h);
-                    const turnosHora = lista.filter((t) => t.dia === d && t.hora === h && ["pendiente", "confirmado"].includes(t.estado));
+                    const on = (horasEdit[semanaH]?.[d] || []).includes(h);
+                    const fechasSem = fechas.filter((f) => f.semana === semanaH).map((f) => f.id);
+                    const turnosHora = lista.filter((t) => {
+                      const f = fechaDe(t);
+                      const enSemana = f ? fechasSem.includes(f) : t.dia === d;
+                      return enSemana && t.hora === h && ["pendiente", "confirmado"].includes(t.estado);
+                    });
                     const hayConfirmado = turnosHora.some((t) => t.estado === "confirmado");
                     const hayPendiente = turnosHora.some((t) => t.estado === "pendiente");
                     const cls = !on
@@ -1311,28 +1355,32 @@ function SeccionAgenda() {
             ))}
             <p className="text-[11px] text-stone-400">Verde = disponible · <span className="text-amber-700 font-semibold">amarillo • = pendiente</span> · <span className="text-blue-700 font-semibold">azul • = confirmado</span> · gris tachada = oculta para reservar. Solo cancelado/completado/eliminado libera la hora.</p>
             <div className="flex justify-center">
-              <button onClick={guardarHorarios} disabled={guardandoHoras} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition disabled:opacity-50"><Save size={15} /> {guardandoHoras ? "Guardando..." : "Guardar horarios"}</button>
+              <button onClick={guardarHorarios} disabled={guardandoHoras} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition disabled:opacity-50"><Save size={15} /> {guardandoHoras ? "Guardando..." : `Guardar horarios semana ${semanaH}`}</button>
             </div>
           </div>
         )}
       </div>
-      {/* Calendario por día */}
-      <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+      {/* Calendario: 2 semanas con fecha */}
+      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
         <button onClick={() => setDiaSel("todos")} className={`rounded-2xl border-2 px-2 py-2.5 text-center transition ${diaSel === "todos" ? "border-lila-900 bg-lila-900 text-white shadow" : "border-stone-200 bg-white hover:border-lila-200"}`}>
           <p className={`text-[10px] font-bold tracking-widest uppercase ${diaSel === "todos" ? "text-white/80" : "text-stone-400"}`}>Todos</p>
           <p className="text-lg font-bold leading-tight">{lista.length}</p>
         </button>
-        {DIAS.map((d) => {
-          const n = porDia(d).length;
-          const activo = diaSel === d;
+        {fechas.map((f) => {
+          const n = porFecha(f.id).length;
+          const activo = diaSel === f.id;
           return (
-            <button key={d} onClick={() => setDiaSel(activo ? "todos" : d)} className={`rounded-2xl border-2 px-2 py-2.5 text-center transition ${activo ? "border-lila-900 bg-lila-900 text-white shadow" : "border-stone-200 bg-white hover:border-lila-200"}`}>
-              <p className={`text-[10px] font-bold tracking-widest uppercase ${activo ? "text-white/80" : "text-stone-400"}`}>{d}</p>
+            <button key={f.id} onClick={() => setDiaSel(activo ? "todos" : f.id)} title={f.etiqueta} className={`rounded-2xl border-2 px-2 py-2.5 text-center transition ${activo ? "border-lila-900 bg-lila-900 text-white shadow" : "border-stone-200 bg-white hover:border-lila-200"}`}>
+              <p className={`text-[10px] font-bold tracking-widest uppercase ${activo ? "text-white/80" : "text-stone-400"}`}>{f.dia} {f.numero}/{f.mes}</p>
               <p className="text-lg font-bold leading-tight">{n}</p>
               <p className={`text-[10px] font-semibold ${activo ? "text-white/80" : n ? "text-emerald-600" : "text-stone-300"}`}>{n ? `${n} turno${n > 1 ? "s" : ""}` : "libre"}</p>
             </button>
           );
         })}
+        <button onClick={() => setDiaSel(diaSel === "sin-fecha" ? "todos" : "sin-fecha")} className={`rounded-2xl border-2 px-2 py-2.5 text-center transition ${diaSel === "sin-fecha" ? "border-lila-900 bg-lila-900 text-white shadow" : "border-stone-200 bg-white hover:border-lila-200"}`}>
+          <p className={`text-[10px] font-bold tracking-widest uppercase ${diaSel === "sin-fecha" ? "text-white/80" : "text-stone-400"}`}>Sin fecha</p>
+          <p className="text-lg font-bold leading-tight">{sinFecha.length}</p>
+        </button>
       </div>
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex gap-2 flex-wrap">
@@ -1340,8 +1388,8 @@ function SeccionAgenda() {
             <button key={e} onClick={() => setFiltro(e)} className={`text-xs font-semibold px-4 py-2 rounded-full capitalize transition ${filtro === e ? "bg-lila-900 text-white" : "bg-lila-50 text-lila-900 hover:bg-lila-100"}`}>{e} ({e === "todos" ? lista.length : lista.filter((t) => t.estado === e).length})</button>
           ))}
         </div>
-        <button onClick={() => { setEdit(null); setForm({ dia: diaSel === "todos" ? "Lun" : diaSel, hora: "", nombre: "", detalle: "", estado: "pendiente", fecha: "", notas: "" }); setMostrarNuevo(!mostrarNuevo); }} className="inline-flex items-center gap-2 bg-lila-900 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-lila-700 transition">
-          {mostrarNuevo ? <Minus size={15} /> : <Plus size={15} />} {mostrarNuevo ? "Cerrar" : `Agregar turno${diaSel === "todos" ? "" : ` (${diaSel})`}`}
+        <button onClick={() => { const f = fechas.find((x) => x.id === diaSel); setEdit(null); setForm({ ...FORM_VACIO, dia: f ? f.dia : "Lun", fecha: f ? f.id : "" }); setMostrarNuevo(!mostrarNuevo); }} className="inline-flex items-center gap-2 bg-lila-900 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-lila-700 transition">
+          {mostrarNuevo ? <Minus size={15} /> : <Plus size={15} />} {mostrarNuevo ? "Cerrar" : "Agregar turno"}
         </button>
       </div>
       {mostrarNuevo && !edit && (
@@ -1355,9 +1403,17 @@ function SeccionAgenda() {
         return (
           <div key={t._id} className={`rounded-2xl border-2 overflow-hidden transition ${abierto ? "border-lila-500 shadow bg-lila-50/60" : "border-stone-200 hover:border-lila-200 bg-white"}`}>
             <div className="flex items-center gap-3 px-4 py-3 flex-wrap">
-              <span className="w-8 h-8 rounded-full grid place-items-center text-xs font-bold shrink-0 bg-lila-100 text-lila-700">{t.dia}</span>
+              <span className="shrink-0 rounded-xl bg-lila-100 text-lila-700 px-2.5 py-1.5 text-center leading-tight">
+                <span className="block text-[10px] font-bold uppercase">{t.dia}</span>
+                <span className="block text-xs font-bold">{fechaDe(t) ? fechaCorta(fechaDe(t)) : "s/f"}</span>
+              </span>
               <span className="text-sm font-bold text-lila-900">{t.hora}</span>
-              <p className="text-sm text-stone-700 flex-1 min-w-[120px]">{t.nombre}{t.apellido ? ` ${t.apellido}` : ""} <span className="text-stone-400">· {t.detalle}</span></p>
+              <div className="flex-1 min-w-[160px]">
+                <p className="text-sm font-semibold text-stone-800">{t.nombre}{t.apellido ? ` ${t.apellido}` : ""}</p>
+                <p className="text-[11px] text-stone-500">
+                  {[t.telefono, t.servicio, t.modalidad, t.detalle].filter(Boolean).join(" · ") || "Sin datos"}
+                </p>
+              </div>
               <select value={borradores[t._id] ?? t.estado} onChange={(e) => marcarEstado(t._id, t.estado, e.target.value)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border capitalize ${borradores[t._id] ? "border-amber-400 bg-amber-50" : "border-stone-200 bg-white"}`}>
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
               </select>
