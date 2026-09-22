@@ -234,20 +234,20 @@ function Footer() {
     <footer className="relative bg-lila-900 text-white overflow-hidden">
       <div aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: "linear-gradient(90deg, #f9ce34, #ee2a7b, #8b5cf6, #25D366)" }} />
       <div aria-hidden className="pointer-events-none absolute -top-20 left-1/4 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-      <div className="relative max-w-6xl mx-auto px-5 py-4 lg:py-2.5 grid gap-3 lg:gap-2 lg:grid-cols-3 items-center text-center">
-        <div className="hidden md:flex items-center justify-center lg:justify-start gap-2.5">
+      <div className="relative max-w-6xl mx-auto px-4 lg:px-5 py-2.5 grid gap-1.5 lg:gap-2 md:grid-cols-3 items-center text-center">
+        <div className="hidden md:flex items-center justify-center md:justify-start gap-2">
           <a href={whatsapp} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="w-8 h-8 rounded-full grid place-items-center text-white ring-1 ring-white/25 hover:ring-white/60 hover:scale-110 hover:-translate-y-0.5 transition" style={{ backgroundColor: "#25D366" }}><WhatsAppIcon size={15} /></a>
           <a href={instagram} target="_blank" rel="noreferrer" aria-label="Instagram" className="w-8 h-8 rounded-full grid place-items-center text-white ring-1 ring-white/25 hover:ring-white/60 hover:scale-110 hover:-translate-y-0.5 transition" style={{ background: "linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7)" }}><InstagramIcon size={15} /></a>
           <a href={`mailto:${email}`} aria-label="Email" className="w-8 h-8 rounded-full grid place-items-center text-white ring-1 ring-white/25 hover:ring-white/60 hover:scale-110 hover:-translate-y-0.5 transition" style={{ backgroundColor: "#EA4335" }}><Mail size={14} /></a>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <img src="/logo.png" alt="Logo Estefani Salaya" className="h-14 w-14 object-contain drop-shadow-[0_2px_10px_rgba(255,255,255,0.25)]" />
+          <img src="/logo.png" alt="Logo Estefani Salaya" className="h-12 w-12 lg:h-14 lg:w-14 object-contain drop-shadow-[0_2px_10px_rgba(255,255,255,0.25)]" />
           <div className="flex flex-col items-center gap-0.5 text-center">
-            <p className="font-script text-2xl leading-none text-white pt-1 whitespace-nowrap">Lic. Salaya Estefani</p>
-            <p className="font-sans font-light text-[11px] tracking-[0.22em] uppercase text-white/70">MPRN 886</p>
+            <p className="font-script text-xl lg:text-2xl leading-none text-white pt-1 whitespace-nowrap">Lic. Salaya Estefani</p>
+            <p className="font-sans font-light text-[10px] lg:text-[11px] tracking-[0.18em] lg:tracking-[0.22em] uppercase text-white/70 whitespace-nowrap">MPRN 886</p>
           </div>
         </div>
-        <div className="flex flex-col gap-1 items-center text-center lg:items-end lg:text-right lg:justify-self-end font-sans font-light tracking-[0.14em] uppercase">
+        <div className="flex flex-col gap-0.5 lg:gap-1 items-center text-center md:items-end md:text-right md:justify-self-end font-sans font-light tracking-[0.1em] lg:tracking-[0.14em] uppercase">
           <p className="text-[9px] md:text-[10px] text-white/60 flex items-center gap-1.5 justify-center">© {new Date().getFullYear()} — Todos los derechos reservados <a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition ml-1"><Lock size={11} /></a></p>
           <p className="text-[9px] md:text-[10px] text-white/40">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="text-white/60 underline underline-offset-4 decoration-white/20 hover:text-white transition">Leandro Calfin</a></p>
           <p className="text-[9px] md:text-[10px] text-white/40 flex items-center gap-2 justify-center">
