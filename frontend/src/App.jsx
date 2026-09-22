@@ -248,7 +248,7 @@ function Footer() {
           </div>
         </div>
         <div className="flex flex-col gap-0.5 lg:gap-1 items-center text-center md:items-end md:text-right md:justify-self-end font-sans font-light tracking-[0.1em] lg:tracking-[0.14em] uppercase">
-          <p className="text-[8px] md:text-[9px] text-white/60 flex items-center gap-1.5 justify-center">© {new Date().getFullYear()} — Todos los derechos reservados <a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition ml-1"><Lock size={11} /></a></p>
+          <p className="text-[8px] md:text-[9px] text-white/60 flex items-center gap-1.5 justify-center"><a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition mr-1"><Lock size={11} /></a>© {new Date().getFullYear()} — Todos los derechos reservados</p>
           <p className="text-[8px] md:text-[9px] text-white/40">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="text-white/60 underline underline-offset-4 decoration-white/20 hover:text-white transition">Leandro Calfin</a></p>
           <p className="text-[8px] md:text-[9px] text-white/40 flex items-center gap-2 justify-center">
             <a href="#/privacidad" className="hover:text-white transition">Privacidad</a>
