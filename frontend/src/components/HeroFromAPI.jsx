@@ -63,12 +63,12 @@ export function HeroFromAPI() {
       <div aria-hidden className="pointer-events-none absolute top-40 -left-16 w-72 h-72 rounded-full bg-lila-100 blur-3xl opacity-70" />
       <div aria-hidden className="pointer-events-none absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-60" style={{ background: "linear-gradient(135deg, #fbddec 0%, #f3e2f0 35%, #ddd0f7 100%)" }} />
 
-      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:gap-y-0 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
+      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 lg:grid lg:grid-cols-2 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:gap-y-0 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
         <div className="lg:col-start-1 lg:row-start-1 lg:self-end">
-          <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 md:text-center lg:text-left [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
+          <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 text-center lg:text-left [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
             <TituloConCortes texto={hero.titulo} />
           </h1>
-          <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md md:max-w-none md:text-center lg:text-left lg:max-w-md">{hero.descripcion}</p>
+          <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] text-center lg:text-left max-w-md mx-auto md:max-w-none lg:mx-0 lg:max-w-md">{hero.descripcion}</p>
           {datos.datosContacto && (
             <div className="mt-6 hidden lg:flex items-center gap-2.5 lg:mt-4">
               <a href={`https://wa.me/${datos.datosContacto.whatsapp}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" title="WhatsApp" className="w-10 h-10 rounded-full grid place-items-center text-white shadow-md hover:scale-110 hover:-translate-y-0.5 transition" style={{ backgroundColor: "#25D366" }}><WhatsAppIcon size={17} /></a>
