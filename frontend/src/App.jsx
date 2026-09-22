@@ -172,7 +172,7 @@ function Navbar({ admin = false, esInicio = true }) {
           )}
           {!admin ? (
             <div className="flex items-center gap-2">
-              {!usuario && mostrarTurnos && <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 text-sm font-semibold px-5 py-2.5 rounded-full shadow-[0_4px_20px_rgba(95,75,158,0.4)]"><span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lila-700" /></span>Solicitar turno</a>}
+              {!usuario && mostrarTurnos && <a href="#/turnos" className="relative inline-flex items-center gap-1.5 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 text-[11px] sm:text-sm font-semibold px-3 py-2 sm:px-5 sm:py-2.5 rounded-full whitespace-nowrap shadow-[0_4px_20px_rgba(95,75,158,0.4)]"><span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-lila-700" /></span>Solicitar turno</a>}
               {usuario && <PerfilAdmin setMenuOpen={setOpen} />}
               <button className="lg:hidden p-2" onClick={() => setOpen(!open)} aria-label="menu">
                 {open ? <X size={20} /> : <Menu size={20} />}
