@@ -5,11 +5,13 @@ let redis;
 export const getRedis = () => {
   if (!redis) {
     const url = process.env.REDIS_URL;
-    // En desarrollo sin REDIS_URL, no intentamos conectar (usamos fallback en memoria)
-    if (!url && process.env.NODE_ENV !== "production") {
+    // Sin REDIS_URL no intentamos conectar (usamos fallback en memoria).
+    // Antes esto solo aplicaba en desarrollo y en producción spameaba
+    // reintentos contra localhost.
+    if (!url) {
       return null;
     }
-    redis = new Redis(url || "redis://localhost:6379", {
+    redis = new Redis(url, {
       maxRetriesPerRequest: 3,
       retryStrategy: (times) => {
         if (process.env.NODE_ENV !== "production") return null; // No reintentar en dev
@@ -26,7 +28,7 @@ export const getRedis = () => {
 export const connectRedis = async () => {
   const client = getRedis();
   if (!client) {
-    console.log("Redis: omitido en desarrollo (sin REDIS_URL)");
+    console.log("Redis: omitido (sin REDIS_URL), usando fallback en memoria");
     return null;
   }
   if (client.status === "wait") {
