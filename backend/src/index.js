@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 import { connectDB } from "./config/db.js";
 import routes from "./routes/index.js";
 
@@ -31,8 +32,16 @@ app.get("/health", (_, res) => res.json({ status: "ok", timestamp: new Date().to
 
 // Servir frontend en producción
 if (isProd) {
-  // Render usa working dir = root del repo, backend está en /backend
-  const distPath = path.join(__dirname, "../../../frontend/dist");
+  // Render: working dir puede ser /opt/render/project/src
+  // backend/src/index.js -> ../../../frontend/dist o ../../../../frontend/dist
+  const candidates = [
+    path.join(__dirname, "../../../frontend/dist"),   // /opt/render/project/frontend/dist
+    path.join(__dirname, "../../../../frontend/dist"), // /opt/render/project/src/frontend/dist
+  ];
+  const distPath = candidates.find(p => {
+    try { return require('fs').existsSync(path.join(p, "index.html")); } catch { return false; }
+  }) || candidates[0];
+  
   app.use(express.static(distPath));
   app.get("*", (_, res) => {
     res.sendFile(path.join(distPath, "index.html"));
