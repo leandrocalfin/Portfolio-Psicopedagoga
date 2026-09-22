@@ -80,8 +80,8 @@ export function HeroFromAPI() {
         <div className="lg:col-start-1 lg:row-start-2 lg:self-start">
           <div className="mt-1 md:mt-0 lg:mt-4 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
             {mostrarTurnos && (
-            <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-3 py-2 text-[11px] sm:px-4 sm:py-2 sm:text-xs md:px-7 md:py-3.5 rounded-full md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
-              <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lila-700" /></span>
+            <a href="#/turnos" className="relative inline-flex items-center gap-1.5 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-2.5 py-1.5 text-[10px] sm:px-4 sm:py-2 sm:text-xs md:px-7 md:py-3.5 rounded-full md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
+              <span className="relative flex h-2 w-2 md:h-2.5 md:w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2 w-2 md:h-2.5 md:w-2.5 bg-lila-700" /></span>
               Solicitar turno →
             </a>
             )}
@@ -97,7 +97,7 @@ export function HeroFromAPI() {
         </div>
 
         {imagenes.length > 0 && (
-        <div className="relative w-full h-[190px] sm:h-[220px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] lg:col-start-2 lg:row-start-1 lg:row-span-2 overflow-hidden" style={{ borderRadius: "28px" }}>
+        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] lg:col-start-2 lg:row-start-1 lg:row-span-2 overflow-hidden" style={{ borderRadius: "28px" }}>
           {imagenes.map((src, i) => (
             <img
               key={src + i}
