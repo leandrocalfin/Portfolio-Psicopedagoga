@@ -78,3 +78,9 @@ button:disabled,
 .hero-fade {
   animation: hero-fade 0.8s ease;
 }
+
+/* Insignia de reCAPTCHA a la izquierda: a la derecha la tapa el botón de WhatsApp */
+.grecaptcha-badge {
+  left: 20px !important;
+  right: auto !important;
+}
