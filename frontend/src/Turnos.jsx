@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, Building2, Video, Check } from "lucide-react";
+import { ArrowLeft, Building2, Video, Check, Shield } from "lucide-react";
 import { useDatos } from "./DataContext.jsx";
 import { api } from "./api.js";
+import { executeRecaptcha } from "./recaptcha.js";
 
 const MODALIDADES = [
   { id: "presencial", label: "Presencial", icon: Building2 },
@@ -57,7 +58,19 @@ export default function Turnos() {
     setReservando(true);
     setErrorReserva("");
     try {
-      await api.reservarTurno({ dia: diaDeFecha, hora, nombre: nombre.trim(), telefono: telefono.trim(), servicio, modalidad, fecha });
+      // Ejecutar reCAPTCHA v3
+      const recaptchaToken = await executeRecaptcha("reservar_turno");
+      
+      await api.reservarTurno({ 
+        dia: diaDeFecha, 
+        hora, 
+        nombre: nombre.trim(), 
+        telefono: telefono.trim(), 
+        servicio, 
+        modalidad, 
+        fecha,
+        recaptchaToken,
+      });
       setConfirmado(true);
     } catch (e) {
       setErrorReserva(e.message);
@@ -225,7 +238,10 @@ export default function Turnos() {
             {reservando ? "Registrando..." : "Confirmar reserva →"}
           </button>
           {errorReserva && <p className="text-xs font-semibold text-red-600 text-center mt-3">{errorReserva}</p>}
-          <p className="text-[11px] text-stone-400 text-center mt-3">
+          <p className="text-[11px] text-stone-400 text-center mt-3 flex items-center justify-center gap-1">
+            <Shield size={12} className="text-emerald-500" /> Protegido por reCAPTCHA v3
+          </p>
+          <p className="text-[11px] text-stone-400 text-center mt-1">
             Completá modalidad, servicio, fecha, horario y tus datos para confirmar.
           </p>
         </div>

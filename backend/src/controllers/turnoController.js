@@ -1,6 +1,7 @@
 import Turno from "../models/Turno.js";
 import HorariosAtencion from "../models/HorariosAtencion.js";
 import { getAll, createOne, updateById, deleteOne } from "./baseController.js";
+import { verifyRecaptcha } from "../utils/recaptcha.js";
 
 const ordenDias = { Lun: 1, Mar: 2, Mié: 3, Jue: 4, Vie: 5, Sáb: 6, Dom: 7 };
 
@@ -36,7 +37,13 @@ export const deleteTurno = deleteOne(Turno);
 // El admin lo ve en el panel aunque el visitante nunca mande el WhatsApp.
 export const reservarTurno = async (req, res) => {
   try {
-    const { dia, hora, nombre, telefono, servicio, modalidad, detalle, fecha } = req.body;
+    const { dia, hora, nombre, telefono, servicio, modalidad, detalle, fecha, recaptchaToken } = req.body;
+
+    // Verificar reCAPTCHA
+    const recaptchaResult = await verifyRecaptcha(recaptchaToken, "reservar_turno");
+    if (!recaptchaResult.success) {
+      return res.status(400).json({ mensaje: "Verificación de seguridad fallida", error: recaptchaResult.error });
+    }
 
     if (!dia || !hora || !nombre || !telefono) {
       return res.status(400).json({ mensaje: "Día, hora, nombre y teléfono son requeridos" });
