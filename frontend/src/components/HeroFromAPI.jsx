@@ -45,13 +45,15 @@ export function HeroFromAPI() {
       <div aria-hidden className="pointer-events-none absolute top-40 -left-16 w-72 h-72 rounded-full bg-lila-100 blur-3xl opacity-70" />
       <div aria-hidden className="pointer-events-none absolute top-1/4 -left-24 w-96 h-96 rounded-full blur-3xl opacity-60" style={{ background: "linear-gradient(135deg, #fbddec 0%, #f3e2f0 35%, #ddd0f7 100%)" }} />
 
-      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 grid gap-4 md:gap-8 items-center relative w-full ${imagenes.length ? "grid-cols-2" : "grid-cols-1"}`}>
+      <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
         <div>
           <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
             <TituloConCortes texto={hero.titulo} />
           </h1>
           <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md">{hero.descripcion}</p>
-          <div className="mt-5 md:mt-7 flex flex-wrap gap-2 md:gap-3">
+        </div>
+        <div>
+          <div className="mt-1 md:mt-0 lg:mt-7 flex flex-wrap gap-2 md:gap-3">
             {mostrarTurnos && (
             <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-4 py-2 md:px-7 md:py-3.5 rounded-full text-xs md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
               <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lila-700" /></span>
@@ -62,7 +64,7 @@ export function HeroFromAPI() {
               Ver servicios
             </button>
           </div>
-          <div className="mt-5 md:mt-6 flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-xs text-stone-500">
+          <div className="mt-4 md:mt-4 lg:mt-6 flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-xs text-stone-500">
             <span className="flex items-center gap-1.5"><MapPin size={14} /> Presencial en <span className="underline underline-offset-2">CRyBE</span></span>
             <span className="flex items-center gap-1.5"><Video size={14} /> Online</span>
             <span className="flex items-center gap-1.5"><School size={14} /> Niños, adolescentes y adultos</span>
