@@ -47,13 +47,13 @@ export function HeroFromAPI() {
 
       <div className={`max-w-6xl mx-auto px-4 sm:px-5 pt-2 pb-4 md:py-10 relative w-full flex flex-col gap-4 md:gap-6 max-md:grid max-md:grid-cols-2 max-md:items-center lg:grid lg:grid-cols-2 lg:gap-8 lg:items-center ${imagenes.length ? "" : "lg:grid-cols-1"}`}>
         <div>
-          <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
+          <h1 className="font-serif-display italic text-xl sm:text-2xl md:text-[36px] leading-[1.2] text-lila-700 md:text-center lg:text-left [text-shadow:0_2px_16px_rgba(95,75,158,0.35)]">
             <TituloConCortes texto={hero.titulo} />
           </h1>
-          <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md">{hero.descripcion}</p>
+          <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md md:max-w-none md:text-center lg:text-left lg:max-w-md">{hero.descripcion}</p>
         </div>
         <div>
-          <div className="mt-1 md:mt-0 lg:mt-7 flex flex-wrap gap-2 md:gap-3">
+          <div className="mt-1 md:mt-0 lg:mt-7 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
             {mostrarTurnos && (
             <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-4 py-2 md:px-7 md:py-3.5 rounded-full text-xs md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
               <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lila-700" /></span>
@@ -64,7 +64,7 @@ export function HeroFromAPI() {
               Ver servicios
             </button>
           </div>
-          <div className="mt-4 md:mt-4 lg:mt-6 flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-xs text-stone-500">
+          <div className="mt-4 md:mt-4 lg:mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-2 md:gap-4 text-[10px] md:text-xs text-stone-500">
             <span className="flex items-center gap-1.5"><MapPin size={14} /> Presencial en <span className="underline underline-offset-2">CRyBE</span></span>
             <span className="flex items-center gap-1.5"><Video size={14} /> Online</span>
             <span className="flex items-center gap-1.5"><School size={14} /> Niños, adolescentes y adultos</span>
