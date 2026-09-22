@@ -97,7 +97,7 @@ export function HeroFromAPI() {
         </div>
 
         {imagenes.length > 0 && (
-        <div className="relative w-full h-[380px] sm:h-[440px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] lg:col-start-2 lg:row-start-1 lg:row-span-2 overflow-hidden" style={{ borderRadius: "28px" }}>
+        <div className="relative w-full h-[190px] sm:h-[220px] md:h-[55vh] md:min-h-[420px] lg:h-[50vh] lg:min-h-[480px] lg:col-start-2 lg:row-start-1 lg:row-span-2 overflow-hidden" style={{ borderRadius: "28px" }}>
           {imagenes.map((src, i) => (
             <img
               key={src + i}
