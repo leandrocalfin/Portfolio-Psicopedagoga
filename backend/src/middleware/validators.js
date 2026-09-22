@@ -152,11 +152,18 @@ export const validateTurno = [
 ];
 
 export const validateReservarTurno = [
-  body("turnoId").isMongoId().withMessage("ID de turno inválido"),
+  // Debe coincidir con lo que envía Turnos.jsx: dia, hora, nombre,
+  // telefono, servicio, modalidad, fecha (+ recaptchaToken que valida
+  // validateRecaptcha). Antes pedía turnoId y email que el front no manda,
+  // por eso TODA reserva fallaba con "Error de validación".
+  body("dia").trim().notEmpty().withMessage("Día requerido"),
+  body("hora").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Hora HH:MM"),
   body("nombre").trim().isLength({ min: 2, max: 100 }).withMessage("Nombre 2-100 caracteres"),
-  body("email").isEmail().normalizeEmail().withMessage("Email inválido"),
-  body("telefono").optional().trim().isLength({ max: 50 }),
-  body("motivo").optional().trim().isLength({ max: 500 }),
+  body("telefono").trim().notEmpty().isLength({ max: 50 }).withMessage("Teléfono requerido"),
+  body("servicio").optional().trim().isLength({ max: 100 }),
+  body("modalidad").optional().trim().isLength({ max: 50 }),
+  body("detalle").optional().trim().isLength({ max: 500 }),
+  body("fecha").optional().isISO8601().withMessage("Fecha inválida (ISO8601)"),
   handleValidation,
 ];
 
