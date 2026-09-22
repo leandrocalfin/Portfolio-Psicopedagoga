@@ -1357,7 +1357,7 @@ function SeccionAgenda() {
             <div className="flex items-center gap-3 px-4 py-3 flex-wrap">
               <span className="w-8 h-8 rounded-full grid place-items-center text-xs font-bold shrink-0 bg-lila-100 text-lila-700">{t.dia}</span>
               <span className="text-sm font-bold text-lila-900">{t.hora}</span>
-              <p className="text-sm text-stone-700 flex-1 min-w-[120px]">{t.nombre} <span className="text-stone-400">· {t.detalle}</span></p>
+              <p className="text-sm text-stone-700 flex-1 min-w-[120px]">{t.nombre}{t.apellido ? ` ${t.apellido}` : ""} <span className="text-stone-400">· {t.detalle}</span></p>
               <select value={borradores[t._id] ?? t.estado} onChange={(e) => marcarEstado(t._id, t.estado, e.target.value)} className={`text-xs font-semibold px-3 py-1.5 rounded-full border capitalize ${borradores[t._id] ? "border-amber-400 bg-amber-50" : "border-stone-200 bg-white"}`}>
                 {ESTADOS.map((e) => <option key={e} value={e}>{e}</option>)}
               </select>

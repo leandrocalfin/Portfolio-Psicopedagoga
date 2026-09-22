@@ -158,8 +158,19 @@ export const validateReservarTurno = [
   // por eso TODA reserva fallaba con "Error de validación".
   body("dia").trim().notEmpty().withMessage("Día requerido"),
   body("hora").matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage("Hora HH:MM"),
-  body("nombre").trim().isLength({ min: 2, max: 100 }).withMessage("Nombre 2-100 caracteres"),
-  body("telefono").trim().notEmpty().isLength({ max: 50 }).withMessage("Teléfono requerido"),
+  body("nombre").trim().isLength({ min: 2, max: 100 }).withMessage("Insertá tu nombre"),
+  body("apellido").trim().isLength({ min: 2, max: 100 }).withMessage("Insertá tu apellido"),
+  body("telefono")
+    .trim()
+    .notEmpty()
+    .withMessage("Insertá tu teléfono")
+    .custom((v) => {
+      const digitos = String(v).replace(/\D/g, "");
+      if (digitos.length < 8 || digitos.length > 15) throw new Error("Insertá un número válido");
+      if (/^(\d)\1+$/.test(digitos)) throw new Error("Insertá un número válido");
+      if (/^(0123456789|1234567890|9876543210|0987654321)$/.test(digitos)) throw new Error("Insertá un número válido");
+      return true;
+    }),
   body("servicio").optional().trim().isLength({ max: 100 }),
   body("modalidad").optional().trim().isLength({ max: 50 }),
   body("detalle").optional().trim().isLength({ max: 500 }),
@@ -180,7 +191,14 @@ export const validateSignedUploadParams = [
 ];
 
 export const validateRecaptcha = [
-  body("recaptchaToken").isString().notEmpty().withMessage("Token reCAPTCHA requerido"),
+  // En dev sin RECAPTCHA_SECRET_KEY el token es opcional (igual que en
+  // verifyRecaptcha, que ahí deja pasar). En producción con secret
+  // configurado, se exige siempre.
+  body("recaptchaToken").custom((v) => {
+    if (!v && !process.env.RECAPTCHA_SECRET_KEY) return true;
+    if (typeof v !== "string" || !v.trim()) throw new Error("Token reCAPTCHA requerido");
+    return true;
+  }),
   handleValidation,
 ];
 

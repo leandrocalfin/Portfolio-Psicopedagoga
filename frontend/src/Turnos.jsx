@@ -48,16 +48,51 @@ export default function Turnos() {
   const [fecha, setFecha] = useState("");
   const [hora, setHora] = useState("");
   const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
   const [confirmado, setConfirmado] = useState(false);
   const [reservando, setReservando] = useState(false);
   const [errorReserva, setErrorReserva] = useState("");
   const [bloqueoCookies, setBloqueoCookies] = useState(false);
+  const [errores, setErrores] = useState({ nombre: "", apellido: "", telefono: "" });
+
+  const SOLO_LETRAS = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ'’\-\s]+$/;
+
+  const validarNombre = (v) => {
+    const t = v.trim();
+    if (!t) return "Insertá tu nombre";
+    if (t.length < 2 || !SOLO_LETRAS.test(t)) return "Insertá tu nombre";
+    return "";
+  };
+
+  const validarApellido = (v) => {
+    const t = v.trim();
+    if (!t) return "Insertá tu apellido";
+    if (t.length < 2 || !SOLO_LETRAS.test(t)) return "Insertá tu apellido";
+    return "";
+  };
+
+  const validarTelefono = (v) => {
+    const digitos = String(v).replace(/\D/g, "");
+    if (!digitos) return "Insertá tu teléfono";
+    // 8 a 15 dígitos y no todos iguales (1111..., 0000...) ni secuenciales obvias
+    if (digitos.length < 8 || digitos.length > 15) return "Insertá un número válido";
+    if (/^(\d)\1+$/.test(digitos)) return "Insertá un número válido";
+    if (/^(0123456789|1234567890|9876543210|0987654321)$/.test(digitos)) return "Insertá un número válido";
+    return "";
+  };
+
+  const validarTodo = () => {
+    const e = { nombre: validarNombre(nombre), apellido: validarApellido(apellido), telefono: validarTelefono(telefono) };
+    setErrores(e);
+    return !e.nombre && !e.apellido && !e.telefono;
+  };
 
   const numeroAdmin = datos.datosContacto?.whatsapp || "5491100000000";
 
   const reservar = async () => {
     setErrorReserva("");
+    if (!validarTodo()) return;
     if (getConsent() !== "aceptadas") {
       setBloqueoCookies(true);
       setErrorReserva("Para reservar necesitás aceptar las cookies (usamos verificación antispam de Google).");
@@ -73,6 +108,7 @@ export default function Turnos() {
         dia: diaDeFecha, 
         hora, 
         nombre: nombre.trim(), 
+        apellido: apellido.trim(), 
         telefono: telefono.trim(), 
         servicio, 
         modalidad, 
@@ -104,11 +140,11 @@ export default function Turnos() {
     : new Set();
 
   const paso = !modalidad ? 1 : !servicio ? 2 : !fecha || !hora ? 3 : 4;
-  const completo = modalidad && servicio && fecha && hora && nombre.trim() && telefono.trim();
+  const completo = modalidad && servicio && fecha && hora && nombre.trim() && apellido.trim() && telefono.trim();
 
   const fechaLabel = fechas.find((f) => f.id === fecha)?.etiqueta ?? fecha;
 
-  const textoPlano = `Hola! Reservé un turno por la web y quedó en estado PENDIENTE.\n- Modalidad: ${modalidad}\n- Servicio: ${servicio}\n- Fecha: ${fechaLabel} (${diaDeFecha})\n- Hora: ${hora}\n- Nombre: ${nombre}\n- Tel: ${telefono}`;
+  const textoPlano = `Hola! Reservé un turno por la web y quedó en estado PENDIENTE.\n- Modalidad: ${modalidad}\n- Servicio: ${servicio}\n- Fecha: ${fechaLabel} (${diaDeFecha})\n- Hora: ${hora}\n- Nombre: ${nombre} ${apellido}\n- Tel: ${telefono}`;
   const mensaje = encodeURIComponent(textoPlano);
 
   const pill = (active) =>
@@ -127,7 +163,7 @@ export default function Turnos() {
           </span>
           <h2 className="font-serif-display text-3xl text-lila-900 mt-4">¡Turno en estado pendiente!</h2>
           <p className="text-sm text-stone-600 mt-2">
-            {nombre}, tu solicitud ya quedó registrada. En breve se comunicarán con vos por WhatsApp al {telefono} para pedirte datos y documentación y terminar de confirmar el turno.
+            {nombre} {apellido}, tu solicitud ya quedó registrada. En breve se comunicarán con vos por WhatsApp al {telefono} para pedirte datos y documentación y terminar de confirmar el turno.
           </p>
           <div className="mt-4 text-sm text-stone-700 bg-lila-50 rounded-2xl p-4 text-left space-y-1">
             <p><strong>Modalidad:</strong> {modalidad}</p>
@@ -224,18 +260,40 @@ export default function Turnos() {
 
           <p className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold mt-6">4 · Tus datos</p>
           <div className="grid sm:grid-cols-2 gap-3 mt-3">
-            <input
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
-              placeholder="Tu nombre"
-              className="rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100"
-            />
-            <input
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-              placeholder="Tu teléfono / WhatsApp"
-              className="rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100"
-            />
+            <div>
+              <p className={`text-[11px] font-semibold mb-1 ${errores.nombre ? "text-red-600" : "text-stone-500"}`}>
+                {errores.nombre || "Nombre"}
+              </p>
+              <input
+                value={nombre}
+                onChange={(e) => { setNombre(e.target.value); if (errores.nombre) setErrores((x) => ({ ...x, nombre: validarNombre(e.target.value) })); }}
+                placeholder="Tu nombre"
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${errores.nombre ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-stone-200 focus:border-lila-500 focus:ring-lila-100"}`}
+              />
+            </div>
+            <div>
+              <p className={`text-[11px] font-semibold mb-1 ${errores.apellido ? "text-red-600" : "text-stone-500"}`}>
+                {errores.apellido || "Apellido"}
+              </p>
+              <input
+                value={apellido}
+                onChange={(e) => { setApellido(e.target.value); if (errores.apellido) setErrores((x) => ({ ...x, apellido: validarApellido(e.target.value) })); }}
+                placeholder="Tu apellido"
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${errores.apellido ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-stone-200 focus:border-lila-500 focus:ring-lila-100"}`}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <p className={`text-[11px] font-semibold mb-1 ${errores.telefono ? "text-red-600" : "text-stone-500"}`}>
+                {errores.telefono || "Teléfono / WhatsApp"}
+              </p>
+              <input
+                value={telefono}
+                onChange={(e) => { setTelefono(e.target.value); if (errores.telefono) setErrores((x) => ({ ...x, telefono: validarTelefono(e.target.value) })); }}
+                placeholder="Tu teléfono / WhatsApp"
+                inputMode="tel"
+                className={`w-full rounded-xl border px-4 py-3 text-sm outline-none focus:ring-2 ${errores.telefono ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-stone-200 focus:border-lila-500 focus:ring-lila-100"}`}
+              />
+            </div>
           </div>
 
           <button

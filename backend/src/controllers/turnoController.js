@@ -37,7 +37,7 @@ export const deleteTurno = deleteOne(Turno);
 // El admin lo ve en el panel aunque el visitante nunca mande el WhatsApp.
 export const reservarTurno = async (req, res) => {
   try {
-    const { dia, hora, nombre, telefono, servicio, modalidad, detalle, fecha, recaptchaToken } = req.body;
+    const { dia, hora, nombre, apellido, telefono, servicio, modalidad, detalle, fecha, recaptchaToken } = req.body;
 
     // Verificar reCAPTCHA
     const recaptchaResult = await verifyRecaptcha(recaptchaToken, "reservar_turno");
@@ -68,6 +68,7 @@ export const reservarTurno = async (req, res) => {
       dia,
       hora,
       nombre: String(nombre).trim(),
+      apellido: String(apellido || "").trim(),
       telefono: String(telefono).trim(),
       servicio: servicio || "",
       modalidad: modalidad || "",

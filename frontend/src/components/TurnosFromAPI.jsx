@@ -69,7 +69,7 @@ export function TurnosFromAPI() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <span className="text-[11px] font-bold text-lila-900">{t.hora}</span>
-                          <span className="text-[11px] font-medium text-stone-700">{t.nombre}</span>
+                          <span className="text-[11px] font-medium text-stone-700">{t.nombre}{t.apellido ? ` ${t.apellido}` : ""}</span>
                         </div>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${getEstadoClass(t.estado)} flex items-center gap-1`}>
                           {getEstadoIcon(t.estado)}

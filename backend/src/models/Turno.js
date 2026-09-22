@@ -9,6 +9,7 @@ const turnoSchema = new mongoose.Schema(
     },
     hora: { type: String, required: true }, // "09:00"
     nombre: { type: String, required: true },
+    apellido: { type: String, default: "" },
     detalle: { type: String }, // "Evaluación", "Seguimiento", "Primera escucha", "Online"
     estado: {
       type: String,
