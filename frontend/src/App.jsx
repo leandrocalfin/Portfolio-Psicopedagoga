@@ -8,6 +8,8 @@ import { ContactoFromAPI } from "./components/ContactoFromAPI.jsx";
 import Admin from "./Admin.jsx";
 import Turnos from "./Turnos.jsx";
 import { AnuncioFlotante } from "./components/AnuncioFlotante.jsx";
+import { CookieBanner } from "./components/CookieBanner.jsx";
+import { Privacidad, Cookies, AvisoLegal } from "./components/Legal.jsx";
 import { useScrollReveal } from "./hooks/useScrollReveal.js";
 // Flag demo: true = muestra sección turnos + botón "Solicitar turno",
 // false = oculta todo lo de turnos sin borrar código.
@@ -245,9 +247,16 @@ function Footer() {
             <p className="font-sans font-light text-[11px] tracking-[0.22em] uppercase text-white/70">MPRN 886</p>
           </div>
         </div>
-        <div className="flex flex-col gap-1 items-center md:items-end text-center md:text-right md:justify-self-end font-sans font-light tracking-[0.14em] uppercase">
-          <p className="text-[10px] md:text-[11px] text-white/60 flex items-center gap-1.5 justify-center md:justify-end">© {new Date().getFullYear()} — Todos los derechos reservados <a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition ml-1"><Lock size={11} /></a></p>
-          <p className="text-[10px] md:text-[11px] text-white/40">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="text-white/60 underline underline-offset-4 decoration-white/20 hover:text-white transition">Leandro Calfin</a></p>
+        <div className="flex flex-col gap-1 items-center text-center md:justify-self-end font-sans font-light tracking-[0.14em] uppercase">
+          <p className="text-[9px] md:text-[10px] text-white/60 flex items-center gap-1.5 justify-center">© {new Date().getFullYear()} — Todos los derechos reservados <a href="#/admin" aria-label="Acceso admin" title="Acceso admin" className="inline-grid place-items-center text-white/25 hover:text-white/80 transition ml-1"><Lock size={11} /></a></p>
+          <p className="text-[9px] md:text-[10px] text-white/40">Sitio desarrollado por <a href="https://www.leandrocalfin.com.ar" target="_blank" rel="noreferrer" className="text-white/60 underline underline-offset-4 decoration-white/20 hover:text-white transition">Leandro Calfin</a></p>
+          <p className="text-[9px] md:text-[10px] text-white/40 flex items-center gap-2 justify-center">
+            <a href="#/privacidad" className="hover:text-white transition">Privacidad</a>
+            <span aria-hidden>·</span>
+            <a href="#/cookies" className="hover:text-white transition">Cookies</a>
+            <span aria-hidden>·</span>
+            <a href="#/aviso-legal" className="hover:text-white transition">Aviso legal</a>
+          </p>
         </div>
       </div>
     </footer>
@@ -271,6 +280,10 @@ export default function App() {
   const [ruta, setRuta] = useState(window.location.hash || "#/");
   const admin = ruta.startsWith("#/admin");
   const esTurnos = ruta.startsWith("#/turnos");
+  const esPrivacidad = ruta.startsWith("#/privacidad");
+  const esCookies = ruta.startsWith("#/cookies");
+  const esAviso = ruta.startsWith("#/aviso-legal");
+  const esLegal = esPrivacidad || esCookies || esAviso;
   const { datos } = useDatos();
   const mostrarTurnos = datos.config?.turnosHabilitados ?? MOSTRAR_TURNOS;
 
@@ -294,8 +307,10 @@ export default function App() {
 
   if (admin) return (<div className="min-h-screen flex flex-col bg-lila-50"><Navbar admin={true} /><div className="flex-1"><Admin /></div><Footer /></div>);
 
-  if (esTurnos && mostrarTurnos) return (<div className="min-h-screen flex flex-col bg-lila-50"><Navbar admin={false} esInicio={false} /><div className="flex-1"><Turnos /></div><Footer /></div>);
-  if (esTurnos && !mostrarTurnos && datos.config) return (<div className="min-h-screen flex flex-col bg-lila-50"><Navbar admin={false} esInicio={false} /><div className="flex-1"><TurnosPausados /></div><Footer /></div>);
+  if (esLegal) return (<div className="min-h-screen flex flex-col bg-white"><Navbar admin={false} esInicio={false} /><div className="flex-1">{esPrivacidad ? <Privacidad /> : esCookies ? <Cookies /> : <AvisoLegal />}</div><Footer /><CookieBanner /></div>);
+
+  if (esTurnos && mostrarTurnos) return (<div className="min-h-screen flex flex-col bg-lila-50"><Navbar admin={false} esInicio={false} /><div className="flex-1"><Turnos /></div><Footer /><CookieBanner /></div>);
+  if (esTurnos && !mostrarTurnos && datos.config) return (<div className="min-h-screen flex flex-col bg-lila-50"><Navbar admin={false} esInicio={false} /><div className="flex-1"><TurnosPausados /></div><Footer /><CookieBanner /></div>);
 
   return (
     <>
@@ -311,6 +326,7 @@ export default function App() {
       <WhatsAppFlotante />
       <Footer />
       <AnuncioFlotante />
+      <CookieBanner />
     </>
   );
 

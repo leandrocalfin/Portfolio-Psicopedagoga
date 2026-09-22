@@ -3,6 +3,7 @@ import { ArrowLeft, Building2, Video, Check, Shield } from "lucide-react";
 import { useDatos } from "./DataContext.jsx";
 import { api } from "./api.js";
 import { executeRecaptcha } from "./recaptcha.js";
+import { getConsent, pedirConsentimiento } from "./cookies.js";
 
 const MODALIDADES = [
   { id: "presencial", label: "Presencial", icon: Building2 },
@@ -51,12 +52,19 @@ export default function Turnos() {
   const [confirmado, setConfirmado] = useState(false);
   const [reservando, setReservando] = useState(false);
   const [errorReserva, setErrorReserva] = useState("");
+  const [bloqueoCookies, setBloqueoCookies] = useState(false);
 
   const numeroAdmin = datos.datosContacto?.whatsapp || "5491100000000";
 
   const reservar = async () => {
-    setReservando(true);
     setErrorReserva("");
+    if (getConsent() !== "aceptadas") {
+      setBloqueoCookies(true);
+      setErrorReserva("Para reservar necesitás aceptar las cookies (usamos verificación antispam de Google).");
+      return;
+    }
+    setBloqueoCookies(false);
+    setReservando(true);
     try {
       // Ejecutar reCAPTCHA v3
       const recaptchaToken = await executeRecaptcha("reservar_turno");
@@ -238,6 +246,7 @@ export default function Turnos() {
             {reservando ? "Registrando..." : "Confirmar reserva →"}
           </button>
           {errorReserva && <p className="text-xs font-semibold text-red-600 text-center mt-3">{errorReserva}</p>}
+          {bloqueoCookies && <button onClick={pedirConsentimiento} className="w-full text-xs font-semibold text-lila-700 underline underline-offset-2 mt-1">Aceptar cookies</button>}
           <p className="text-[11px] text-stone-400 text-center mt-3 flex items-center justify-center gap-1">
             <Shield size={12} className="text-emerald-500" /> Protegido por reCAPTCHA v3
           </p>

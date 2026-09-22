@@ -1,8 +1,9 @@
 import { useDatos } from "../DataContext.jsx";
 import { Mail, MapPin, Check, Shield, Send } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../api.js";
 import { executeRecaptcha } from "../recaptcha.js";
+import { getConsent, pedirConsentimiento } from "../cookies.js";
 
 function WhatsAppIcon({ size = 20 }) {
   return (
@@ -22,11 +23,24 @@ export function ContactoFromAPI() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({ nombre: "", email: "", mensaje: "" });
+  const [bloqueoCookies, setBloqueoCookies] = useState(false);
+
+  useEffect(() => {
+    const actualizar = () => setBloqueoCookies(false);
+    window.addEventListener("cookie-consent", actualizar);
+    return () => window.removeEventListener("cookie-consent", actualizar);
+  }, []);
 
   if (!contacto) return <section id="contacto" className="bg-lila-50/60 py-16 md:py-24 scroll-mt-20 min-h-[calc(100svh-5rem)] flex items-center"><div className="max-w-5xl mx-auto px-5 w-full text-center text-stone-500">Cargando...</div></section>;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (getConsent() !== "aceptadas") {
+      setBloqueoCookies(true);
+      setError("Para enviar el formulario necesitás aceptar las cookies (usamos verificación antispam de Google).");
+      return;
+    }
+    setBloqueoCookies(false);
     setSubmitting(true);
     setError("");
     try {
@@ -66,6 +80,7 @@ export function ContactoFromAPI() {
                 <div><label className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold block mb-1">Email</label><input type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} required className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100 bg-white" /></div>
                 <div><label className="text-[11px] tracking-[0.2em] uppercase text-lila-500 font-semibold block mb-1">Mensaje</label><textarea rows={4} value={form.mensaje} onChange={(e) => setForm({...form, mensaje: e.target.value})} required className="w-full rounded-xl border border-stone-200 px-4 py-3 text-sm outline-none focus:border-lila-500 focus:ring-2 focus:ring-lila-100 bg-white resize-none" /></div>
                 {error && <p className="text-xs font-semibold text-red-600 text-center">{error}</p>}
+                {bloqueoCookies && <button type="button" onClick={pedirConsentimiento} className="w-full text-xs font-semibold text-lila-700 underline underline-offset-2">Aceptar cookies</button>}
                 <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 bg-lila-900 text-white text-xs font-semibold tracking-[0.15em] px-6 py-3 rounded-full hover:bg-lila-700 transition disabled:opacity-40 disabled:cursor-not-allowed">
                   {submitting ? "Enviando..." : <>Enviar mensaje <Send size={14} /></>}
                 </button>
