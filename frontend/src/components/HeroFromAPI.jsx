@@ -70,7 +70,7 @@ export function HeroFromAPI() {
           </h1>
           <p className="mt-4 text-stone-700 text-xs md:text-[15px] leading-[1.7] max-w-md md:max-w-none md:text-center lg:text-left lg:max-w-md">{hero.descripcion}</p>
           {datos.datosContacto && (
-            <div className="mt-6 hidden lg:flex items-center gap-2.5">
+            <div className="mt-6 hidden lg:flex items-center gap-2.5 lg:mt-4">
               <a href={`https://wa.me/${datos.datosContacto.whatsapp}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" title="WhatsApp" className="w-10 h-10 rounded-full grid place-items-center text-white shadow-md hover:scale-110 hover:-translate-y-0.5 transition" style={{ backgroundColor: "#25D366" }}><WhatsAppIcon size={17} /></a>
               <a href={`mailto:${datos.datosContacto.email}`} aria-label={datos.datosContacto.email} title={datos.datosContacto.email} className="w-10 h-10 rounded-full grid place-items-center text-white shadow-md hover:scale-110 hover:-translate-y-0.5 transition" style={{ backgroundColor: "#EA4335" }}><Mail size={17} /></a>
               <a href={datos.datosContacto.instagram || "https://instagram.com/"} target="_blank" rel="noreferrer" aria-label="Instagram" title="Instagram" className="w-10 h-10 rounded-full grid place-items-center text-white shadow-md hover:scale-110 hover:-translate-y-0.5 transition" style={{ background: "linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7)" }}><InstagramIcon size={17} /></a>
@@ -78,7 +78,7 @@ export function HeroFromAPI() {
           )}
         </div>
         <div className="lg:col-start-1 lg:row-start-2">
-          <div className="mt-1 md:mt-0 lg:mt-7 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
+          <div className="mt-1 md:mt-0 lg:mt-4 flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
             {mostrarTurnos && (
             <a href="#/turnos" className="relative inline-flex items-center gap-2 pink-lavender-bg hover:brightness-95 hover:scale-[1.04] transition text-lila-900 font-semibold px-4 py-2 md:px-7 md:py-3.5 rounded-full text-xs md:text-sm shadow-[0_6px_24px_rgba(95,75,158,0.45)]">
               <span className="relative flex h-2.5 w-2.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lila-600 opacity-60" /><span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lila-700" /></span>
