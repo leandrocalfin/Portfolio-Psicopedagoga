@@ -1250,11 +1250,6 @@ function SeccionAgenda() {
         <div><p className={labelCls}>Servicio</p><input value={form.servicio} onChange={(e) => setForm({ ...form, servicio: e.target.value })} placeholder="Motivo / servicio" className={`${inputCls} mt-1.5`} /></div>
         <div><p className={labelCls}>Modalidad</p><select value={form.modalidad} onChange={(e) => setForm({ ...form, modalidad: e.target.value })} className={`${inputCls} mt-1.5`}><option value="">—</option><option value="presencial">Presencial</option><option value="online">Online</option></select></div>
       </div>
-      <div><p className={labelCls}>Detalle</p><input value={form.detalle} onChange={(e) => setForm({ ...form, detalle: e.target.value })} placeholder="Evaluación / Seguimiento / Online" className={`${inputCls} mt-1.5`} /></div>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <div><p className={labelCls}>Fecha (opcional)</p><input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} className={`${inputCls} mt-1.5`} /></div>
-        <div><p className={labelCls}>Notas privadas</p><input value={form.notas} onChange={(e) => setForm({ ...form, notas: e.target.value })} placeholder="Solo visible para admin" className={`${inputCls} mt-1.5`} /></div>
-      </div>
       <div className="flex gap-2 flex-wrap">
         <button onClick={guardar} className="inline-flex items-center gap-2 bg-emerald-600 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-emerald-700 transition"><Save size={15} /> Guardar</button>
         <button onClick={() => { setEdit(null); setMostrarNuevo(false); setForm(FORM_VACIO); }} className="inline-flex items-center gap-2 border border-stone-200 text-stone-600 text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-stone-50 transition bg-white">Cancelar</button>
